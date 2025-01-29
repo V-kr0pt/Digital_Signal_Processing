@@ -1,6 +1,6 @@
 import numpy as np
 
-def bit_reversal_permutation(x:np.array, N:int) -> np.array:
+def permute_by_bit_reversal(x:np.array, N:int) -> np.array:
     '''
     Função que reorganiza os elementos de um array x de tamanho N em ordem reversa dos bits.
     
@@ -30,6 +30,6 @@ def fft_dit(x):
     if np.log2(N) % 1 > 0: # se o N não for uma potência de 2, o resto da divisão inteira de log2(N) por 1 será maior que 0.
         raise ValueError("O tamanho da entrada deve ser uma potência de 2")
     
-    x = bit_reversal_permutation(x, N)  # Reorganização em ordem reversa dos bit
+    x = permute_by_bit_reversal(x, N)  # Reorganização em ordem reversa dos bit
 
     ... # Implementação da FFT
