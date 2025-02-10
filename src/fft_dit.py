@@ -14,4 +14,18 @@ def fft_dit(x):
     
     x = permute_by_bit_reversal(x, N)  # Reorganização em ordem reversa dos bit
 
-    ... # Implementação da FFT
+
+    # pseudo-código encontrado em https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm 
+    # com o nome de "iterative-fft" traduzido:
+    for s in range(1, int(np.log2(N)) + 1): # para cada estágio s
+        m = 2**s # número de pontos no subgrupo (2, 4, 8, ...)
+        Wm = np.exp(-2j * np.pi / m) # fator de twiddle
+        for k in range(0, N, m): # para cada subgrupo
+            W = 1
+            for j in range(m//2):
+                t = W * x[k + j + m//2]
+                u = x[k + j]
+                x[k + j] = u + t
+                x[k + j + m//2] = u - t
+                W = W * Wm
+    return x
