@@ -11,21 +11,22 @@ def dft(x):
             X[k] += x[n] * np.exp(-2j * np.pi * k * n / N)
     return X
 
-# Uso do programa
-input_filename = "entrada.txt"
-output_filename = "saida_dft.txt"
+if __name__ == "__main__":
+    # Uso do programa
+    input_filename = "entrada.txt"
+    output_filename = "saida_dft.txt"
 
-# Leitura dos dados de entrada
-x = read_input_file(input_filename)
+    # Leitura dos dados de entrada
+    x = read_input_file(input_filename)
 
-# Medição do tempo de execução
-start_time = time.time()
-X = dft(x)
-end_time = time.time()
+    # Medição do tempo de execução
+    start_time = time.time()
+    X = dft(x)
+    end_time = time.time()
 
-# Escrita dos resultados no arquivo de saída
-write_output_file(output_filename, X)
+    # Escrita dos resultados no arquivo de saída
+    write_output_file(output_filename, X)
 
-# Tempo de execução
-execution_time = end_time - start_time
-print(f"Tempo de execução da DFT: {execution_time:.6f} segundos")
+    # Tempo de execução
+    execution_time = end_time - start_time
+    print(f"Tempo de execução da DFT: {execution_time:.6f} segundos")
