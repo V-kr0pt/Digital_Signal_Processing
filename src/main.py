@@ -1,9 +1,11 @@
 import os
 import argparse
-import numpy as np
+import time
+
+from dft import dft
 from fft_dit import fft_dit
-from utils import read_input_file, write_output_file
-from matplotlib import pyplot as plt
+from utils import read_input_file, write_output_file, plot_fft
+
 
 def main(args):
     input_path = os.path.join(args.input)
@@ -15,37 +17,27 @@ def main(args):
     # o vetor de entrada de teste será uma sinc, 64 amostras
     #x = np.sinc(np.linspace(-4, 4, 64))
 
-    # calculando a FFT usando DIT
-    X = fft_dit(x)
-
-    # calculando DFT
-    # ...
-
-    # salvando o resultado no arquivo de saída
+    # calculando a DFT
+    if args.algo == 'fft':
+        X = fft_dit(x)
+    else:
+        X = dft(x)
+    # salvando o resultado no arquivo de saída (CORRIGIR)
     output_path = os.path.join(args.output)
     write_output_file(output_path, X)
-
+    
     if args.save_plot:
-        X = np.fft.fftshift(X) #se quiser visualizar o espectro de frequência centralizado
-        # plotando o sinal no tempo e o espectro de magnitude
-        subplot = plt.figure(figsize=(10, 6))
-        plt.subplot(2, 1, 1)
-        plt.stem(x)
-        plt.title("Sinal no tempo")
-        plt.subplot(2, 1, 2)
-        plt.stem(np.abs(X))
-        plt.title("Espectro de magnitude")
-
-        # salvando a figura em images
-        fig_path = os.path.join("images",args.input+".png")
-        plt.savefig(fig_path)
+        plot_fft(X)
+        
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Input and output files.')
-    parser.add_argument('--input', type=str, help='Input file name')
-    parser.add_argument('--output', type=str, default='a.out', help='Output file name')
-    parser.add_argument('--save_plot', action='store_true', default=False, )
-    
+    parser.add_argument('--i', type=str, help='Input file name (a file of complex numbers representing the signal in time domain)')
+    parser.add_argument('--o', type=str, default='a.out', help='Output file name (a file of complex numbers representing the signal in frequency domain)')
+    parser.add_argument('--save_plot', action='store_true', default=False, help='Save plot of the signal in time and frequency domain into images folder')
+    parser.add_argument('--algo', type=str, default='fft', help='Algorithm to use (dft or fft)')
+
+
     args = parser.parse_args()
     main(args)
 
