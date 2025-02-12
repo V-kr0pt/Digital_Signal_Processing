@@ -1,4 +1,6 @@
+import os
 import numpy as np
+from matplotlib import pyplot as plt
 
 def permute_by_bit_reversal(x:np.array, N:int) -> np.array:
     '''
@@ -32,3 +34,28 @@ def write_output_file(filename, X):
     with open(filename, 'w') as f:
         for value in X:
             f.write(f"{value.real:.6f} {value.imag:.6f}\n")
+
+def plot_fft(filename:str, x:np.darray, X:np.darray):
+    """
+    Função que plota o sinal no tempo e na frequência e salva em "images"
+
+    Parâmetros:
+        filename: str - nome do arquivo de saída
+        x: np.array - vetor no domínio do tempo
+        X: np.array - vetor no domínio da frequência        
+    
+    Retorno:
+        None    
+    """
+    X = np.fft.fftshift(X) #para visualizar o espectro de frequência centralizado
+    # plotando o sinal no tempo e o espectro de magnitude
+    subplot = plt.figure(figsize=(10, 6))
+    plt.subplot(2, 1, 1)
+    plt.stem(x)
+    plt.title("Sinal no tempo")
+    plt.subplot(2, 1, 2)
+    plt.stem(np.abs(X))
+    plt.title("Espectro de magnitude")
+    # salvando a figura em images
+    fig_path = os.path.join("images",{filename}+".png")
+    plt.savefig(fig_path)
