@@ -35,7 +35,16 @@ def write_output_file(filename, X):
         for value in X:
             f.write(f"{value.real:.6f} {value.imag:.6f}\n")
 
-def plot_fft(filename:str, x:np.darray, X:np.darray):
+def save_execution_time(filename:str, time:float, N:float, algo:str):
+    "saving in csv file"
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            f.write("N,Time,Algo\n")
+    with open(filename, 'a') as f:
+        f.write(f"{N},{time},{algo}\n")
+
+
+def plot_fft(filename:str, x:np.ndarray, X:np.ndarray):
     """
     Função que plota o sinal no tempo e na frequência e salva em "images"
 
