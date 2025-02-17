@@ -10,7 +10,9 @@ def fft_dit(x):
     N = x.shape[0] # número de elementos
 
     if np.log2(N) % 1 > 0: # se o N não for uma potência de 2, o resto da divisão inteira de log2(N) por 1 será maior que 0.
-        raise ValueError("O tamanho da entrada deve ser uma potência de 2")
+        # adiciona zeros para completar a potência de 2 (zero padding)
+        zeros = np.zeros(2**int(np.log2(N)+1) - N, dtype=complex)
+        x = np.concatenate((x, zeros))
     
     x = permute_by_bit_reversal(x, N)  # Reorganização em ordem reversa dos bit
 
