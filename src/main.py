@@ -32,8 +32,8 @@ def main(input, output, algo='fft', save_plot=False, time_filename=None, save_ou
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Input and output files.')
-    parser.add_argument('--i', type=str, help='Input file name (a file of complex numbers representing the signal in time domain)')
-    parser.add_argument('--o', type=str, default='a.out', help='Output file name (a file of complex numbers representing the signal in frequency domain)')
+    parser.add_argument('--i', type=str, default='entrada.txt', help='Input file name (a file of complex numbers representing the signal in time domain)')
+    parser.add_argument('--o', type=str, default='saida.txt', help='Output file name (a file of complex numbers representing the signal in frequency domain)')
     parser.add_argument('--save_plot', action='store_true', default=False, help='Save plot of the signal in time and frequency domain into images folder')
     parser.add_argument('--algo', type=str, default='fft', help='Algorithm to use (dft or fft)')
     parser.add_argument('--time', type=str, help='The name of the file to save the execution time')
