@@ -13,7 +13,7 @@ if __name__ == '__main__':
     output_dir = 'io_tests' 
     os.makedirs(output_dir, exist_ok=True)
     
-    num_files = 15
+    num_files = 12
     num_points_list = [np.pow(2,num) for num in range(3,num_files+3)] # a partir de 8 pontos
 
     generate_test_files(num_points_list, output_dir)
