@@ -41,7 +41,7 @@ def write_output_file(filename, X, real_complex_format=True):
                 f.write(f"{value.real:.6f} {value.imag:.6f}\n")
     else:
         with open(filename, 'w') as f:
-            for value in y:
+            for value in X:
                 f.write(f"{value:.6f}\n")
 
 def save_execution_time(filename:str, time:float, N:float, algo:str):
