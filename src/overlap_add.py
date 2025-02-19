@@ -31,9 +31,11 @@ def overlap_add_convolution(x, h, L):
 
 if __name__ == '__main__':
     # Nomes dos arquivos
-    h_filename = "h.txt"  # Arquivo do filtro h[n]
-    x_filename = "x.txt"  # Arquivo do sinal x[n]
-    output_filename = "saida_convolucao_overlap_add.txt"
+    import os
+    io_folder = 'overlap_add_io'
+    h_filename = os.path.join(io_folder,"h.txt")  # Arquivo do filtro h[n]
+    x_filename = os.path.join(io_folder,"x.txt")  # Arquivo do sinal x[n]
+    output_filename = os.path.join(io_folder,"saida_convolucao_overlap_add.txt")
 
     # Leitura dos sinais
     h = read_input_file(h_filename, real_complex_format=False)
