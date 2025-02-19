@@ -31,3 +31,10 @@ def fft_dit(x):
                 x[k + j + m//2] = u - t
                 W = W * Wm
     return x
+
+def ifft_dit(X):
+    """ Implementação da IFFT utilizando a FFT com DIT. """
+    N = len(X)
+    X_conj = np.conjugate(X)  # Conjugado para inverter
+    x = fft_dit(X_conj)  # Aplica a FFT
+    return np.conjugate(x) / N  # Conjugado de volta e divide por N
