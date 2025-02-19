@@ -20,20 +20,29 @@ def permute_by_bit_reversal(x:np.array, N:int) -> np.array:
     reversed_indices = [int(f'{i:0{num_bits}b}'[::-1], 2) for i in indices]
     return x[reversed_indices]
 
-def read_input_file(filename):
+def read_input_file(filename, real_complex_format=True):
     """ Lê o arquivo de entrada e retorna um array numpy de números complexos. """
-    data = []
-    with open(filename, 'r') as f:
-        for line in f:
-            real, imag = map(float, line.split())
-            data.append(complex(real, imag))
+    if real_complex_format:
+        data = []
+        with open(filename, 'r') as f:
+            for line in f:
+                real, imag = map(float, line.split())
+                data.append(complex(real, imag))
+    else:
+        with open(filename, 'r') as f:
+            data = [float(line.strip()) for line in f]
     return np.array(data)
 
-def write_output_file(filename, X):
+def write_output_file(filename, X, real_complex_format=True):
     """ Escreve os valores da DFT em um arquivo de saída. """
-    with open(filename, 'w') as f:
-        for value in X:
-            f.write(f"{value.real:.6f} {value.imag:.6f}\n")
+    if real_complex_format:
+        with open(filename, 'w') as f:
+            for value in X:
+                f.write(f"{value.real:.6f} {value.imag:.6f}\n")
+    else:
+        with open(filename, 'w') as f:
+            for value in y:
+                f.write(f"{value:.6f}\n")
 
 def save_execution_time(filename:str, time:float, N:float, algo:str):
     "saving in csv file"

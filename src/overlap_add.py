@@ -1,5 +1,6 @@
 import numpy as np
 from fft_dit import fft_dit, ifft_dit
+from utils import read_input_file, write_output_file
 
 def overlap_add_convolution(x, h, L):
     """ Implementa a convolução usando o método Overlap-Add com FFT DIT """
@@ -22,26 +23,14 @@ def overlap_add_convolution(x, h, L):
 
     return y
 
-def read_input_file(filename):
-    """ Lê os dados de um arquivo e retorna um array numpy """
-    with open(filename, 'r') as f:
-        data = [float(line.strip()) for line in f]
-    return np.array(data)
-
-def write_output_file(filename, y):
-    """ Escreve os valores da convolução no arquivo de saída """
-    with open(filename, 'w') as f:
-        for value in y:
-            f.write(f"{value:.6f}\n")
-
 # Nomes dos arquivos
 h_filename = "h.txt"  # Arquivo do filtro h[n]
 x_filename = "x.txt"  # Arquivo do sinal x[n]
 output_filename = "saida_convolucao_overlap_add.txt"
 
 # Leitura dos sinais
-h = read_input_file(h_filename)
-x = read_input_file(x_filename)
+h = read_input_file(h_filename, real_complex_format=False)
+x = read_input_file(x_filename, real_complex_format=False)
 
 # Define o tamanho do bloco L (por padrão, metade do tamanho da FFT ideal)
 L = len(x) // 2
@@ -50,6 +39,6 @@ L = len(x) // 2
 y = overlap_add_convolution(x, h, L)
 
 # Salva o resultado
-write_output_file(output_filename, y)
+write_output_file(output_filename, y, real_complex_format=False)
 
 print(f"Convolução calculada e salva em '{output_filename}'")
