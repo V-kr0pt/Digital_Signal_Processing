@@ -32,10 +32,23 @@ def overlap_add_convolution(x, h, L):
 if __name__ == '__main__':
     # Nomes dos arquivos
     import os
-    io_folder = 'overlap_add_io'
-    h_filename = os.path.join(io_folder,"h.txt")  # Arquivo do filtro h[n]
-    x_filename = os.path.join(io_folder,"x.txt")  # Arquivo do sinal x[n]
-    output_filename = os.path.join(io_folder,"saida_convolucao_overlap_add.txt")
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Calcula a convolução de dois sinais usando o método Overlap-Add')
+    parser.add_argument('--h', type=str, default='h.txt', help='Nome do arquivo do filtro h[n]')
+    parser.add_argument('--x', type=str, default='x.txt', help='Nome do arquivo do sinal x[n]')
+    parser.add_argument('--output', type=str, default='saida_convolucao_overlap_add.txt', help='Nome do arquivo de saída')
+    parser.add_argument('--io_folder', type=str, default='overlap_add_io', help='Pasta de entrada e saída')
+    args = parser.parse_args()
+
+    # Exceção se diretório de entrada e saída se não existir
+    if not os.path.exists(args.io_folder):
+        raise FileNotFoundError(f"O diretório '{args.io_folder}' não existe")
+
+    # Salvando os caminhos dos arquivos
+    h_filename = os.path.join(args.io_folder,args.h)  # Arquivo do filtro h[n]
+    x_filename = os.path.join(args.io_folder,args.x)  # Arquivo do sinal x[n]
+    output_filename = os.path.join(args.io_folder,args.output)  # Arquivo de saída
 
     # Leitura dos sinais
     h = read_input_file(h_filename, real_complex_format=False)
