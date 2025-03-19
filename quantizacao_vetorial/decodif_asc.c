@@ -1,11 +1,11 @@
 /******************************************************************
 * Arquivo:decodif_asc.c                                           *
 *                                                                 *
-* Reconstrução de sinal quantizado vetorialmente.                 *
+* Reconstruï¿½ï¿½o de sinal quantizado vetorialmente.                 *
 *                                                                 *
 * Autor: Francisco Madeiro Bernardino Junior                      *
 *                                                                 *
-* Modificado por: Waslon Terllizzie Araújo Lopes                  *
+* Modificado por: Waslon Terllizzie Araï¿½jo Lopes                  *
 *                                                                 *
 * Data: 18/04/2001.                                               *
 *                                                                 *
@@ -15,36 +15,45 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <math.h>
+#include <string.h>
 #include "inout.h"
 #define cnome 50 /* comprimento max. de nome de arquivo,incluindo diretorio */
 
 void decodifica_arquivo(char entrada[], char saida[], double **x, int N, int K);
 double distancia(double *pta, double *ptb, int K);
 
-int main()
+int main(int argc, char *argv[])
 {
    char dicion[cnome], codi[cnome], decod[cnome];
    int   K, N;
    double **pta;
    
+   if(argc!=6){
+      printf("Qual a dimensï¿½o do quantizador?\n");
+      scanf("%d", &K);
 
-   printf("Qual a dimensão do quantizador?\n");
-   scanf("%d", &K);
+      printf("Qual o nï¿½mero de nï¿½veis do dicionï¿½rio?\n");
+      scanf("%d", &N);
 
-   printf("Qual o número de níveis do dicionário?\n");
-   scanf("%d", &N);
+      printf("Qual o nome do arquivo que contï¿½m o dicionï¿½rio ?\n");
+      scanf("%s", dicion);
 
-   printf("Qual o nome do arquivo que contém o dicionário ?\n");
-   scanf("%s", dicion);
+      printf("Qual o nome do arquivo de sï¿½mbolos a serem decodificados ?\n");
+      scanf("%s", codi);
 
-   printf("Qual o nome do arquivo de símbolos a serem decodificados ?\n");
-   scanf("%s", codi);
+      printf("Qual o nome do arquivo de sï¿½mbolos decodificados ?\n");
+      scanf("%s", decod);
+   }
+   else{
+      K = atoi(argv[1]); // atoi converts a string to an integer
+      N = atoi(argv[2]);
+      strcpy(dicion,argv[3]); // strcpy copies a string
+      strcpy(codi,argv[4]);
+      strcpy(decod,argv[5]);
+   }
 
-   printf("Qual o nome do arquivo de símbolos decodificados ?\n");
-   scanf("%s", decod);
 
-
-   //Alocação de memória -- vetor N x K
+   //Alocaï¿½ï¿½o de memï¿½ria -- vetor N x K
 
    pta = ler_arquivo(dicion,N,K); 
 
@@ -56,9 +65,9 @@ int main()
 
 void decodifica_arquivo(char entrada[], char saida[], double **x, int N, int K){
 /******************************************************************
-* Função que os índices armazenados no arquivo de nomes "entrada",*
-* de acordo com o dicionário "x" de dimensão N,K. Os dados de saí-*
-* são escritos no arqbuivo de nome "saida".                       *
+* Funï¿½ï¿½o que os ï¿½ndices armazenados no arquivo de nomes "entrada",*
+* de acordo com o dicionï¿½rio "x" de dimensï¿½o N,K. Os dados de saï¿½-*
+* sï¿½o escritos no arqbuivo de nome "saida".                       *
 ******************************************************************/
 
 FILE *entradap, *saidap;
