@@ -1,0 +1,57 @@
+SNR PCM 7bits: 
+SNR = 26.52 dB
+SNRseg = 18.67 dB
+
+SNR PCM 6bits: 
+SNR = 21.23 dB
+SNRseg = 13.43 dB
+
+SNR PCM 5bits: 
+SNR = 15.00 dB
+SNRseg = 7.36 dB
+
+SNR PCM 4bits: 
+SNR = 8.53 dB
+SNRseg = 1.06 dB
+
+SNR PCM 3bits: 
+SNR = 1.75 dB
+SNRseg = -5.77 dB
+
+SNR PCM 2bits: 
+SNR = -5.04 dB
+SNRseg = -12.64 dB
+
+SNR PCM 1bits: 
+SNR = -11.77 dB
+SNRseg = -19.53 dB
+
+======================
+SNR mu-law 7bits: 
+SNR = 31.84 dB
+SNRseg = 32.44 dB
+
+SNR mu-law 6bits: 
+SNR = 25.72 dB
+SNRseg = 25.28 dB
+
+SNR mu-law 5bits: 
+SNR = 19.53 dB
+SNRseg = 18.92 dB
+
+SNR mu-law 4bits: 
+SNR = 13.34 dB
+SNRseg = 13.68 dB
+
+SNR mu-law 3bits: 
+SNR = 6.82 dB
+SNRseg = 6.21 dB
+
+SNR mu-law 2bits: 
+SNR = 2.46 dB
+SNRseg = -0.04 dB
+
+SNR mu-law 1bits: 
+SNR = 1.71 dB
+SNRseg = -2.34 dB
+
