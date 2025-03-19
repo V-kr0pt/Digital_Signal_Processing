@@ -8,10 +8,11 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <malloc.h>
+#include <string.h>
 #include <math.h>
 
 #define DIM 256
-int main(void){
+int main(int argc, char *argv[]){
 
 	char name[25];
 	int i,j,k,l;
@@ -19,12 +20,22 @@ int main(void){
 	int *ha,**pta;
 	long w;
 	float x;
+	int flag;
 
-	printf("\nDigite o nome do arquivo  de entrada de dados (*.dat): ");
-	scanf("%s",&name[0]);
+	if(argc != 3){
+		flag = 1;
+	}
+	
+	if (flag){
+		printf("\nDigite o nome do arquivo  de entrada de dados (*.dat): ");
+		scanf("%s",&name[0]);
+	} else {
+		strcpy(name, argv[1]); 
+	}
+	
 	if((arquivo=fopen(name,"r"))==NULL){
-	  printf("\nN�o foi poss�vel abrir o arquivo de entrada de dados\n");
-	  exit(1);
+		printf("\nN�o foi poss�vel abrir o arquivo de entrada de dados\n");
+		exit(1);
 	}
 
 
@@ -75,9 +86,13 @@ int main(void){
 					   pta[4*i+k][4*j+l] = ha[1024*i + 16*j + 4*k + l];
 
 	//armazenamento da imagem reconstruida em arquivo
-
-	printf("\nDigite o nome do arquivo da imagem de saida (*.pgm): ");
-	scanf("%s",&name[0]);
+	if(flag){
+		printf("\nDigite o nome do arquivo da imagem de saida (*.pgm): ");
+		scanf("%s",&name[0]);
+	}
+	else {
+		strcpy(name, argv[2]); 
+	}
 	if((arquivo=fopen(name,"w"))==NULL){
 	  printf("\nN�o foi poss�vel abrir o arquivo de sa�da de dados\n");
 	  exit(1);
