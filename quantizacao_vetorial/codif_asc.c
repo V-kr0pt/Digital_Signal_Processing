@@ -1,8 +1,8 @@
 /******************************************************************
 * Arquivo: codif_asc.c                                            *
 *                                                                 *
-* Codifica um arquivo ascii segundo o dicionário QV fornecido, se-*
-* guindo a regra da distorção mínima (distância euclidiana).      *
+* Codifica um arquivo ascii segundo o dicionï¿½rio QV fornecido, se-*
+* guindo a regra da distorï¿½ï¿½o mï¿½nima (distï¿½ncia euclidiana).      *
 *                                                                 *
 * Autor: Francisco Madeiro Bernardino Junior                      *
 * UFPB - CCT - DEE - LABCOM                                       *
@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <math.h>
+#include <string.h>
 #include "alocacao.h"
 #include "inout.h"
 #define cnome 50 
@@ -23,26 +24,35 @@ int codifica(double **pta, double *y, int N, int K);
 void codifica_arquivo(char entrada[], char saida[], double **x, int N, int K);
 double distancia(double *pta, double *ptb, int K);
 
-int main()
+int main(int argc, char *argv[])
 {
    char dicion[cnome], codi[cnome], ent[cnome];
    int   K, N;
    double **pta;
    
-   printf("Qual a dimensão do quantizador?\n");
-   scanf("%d", &K);
+   if(argc!=6){
+      printf("Qual a dimensï¿½o do quantizador?\n");
+      scanf("%d", &K);
 
-   printf("Qual o número de níveis do dicionário?\n");
-   scanf("%d", &N);
+      printf("Qual o nï¿½mero de nï¿½veis do dicionï¿½rio?\n");
+      scanf("%d", &N);
 
-   printf("Qual o nome do arquivo que contém o dicionário ?\n");
-   scanf("%s", dicion);
+      printf("Qual o nome do arquivo que contï¿½m o dicionï¿½rio ?\n");
+      scanf("%s", dicion);
 
-   printf("Qual o nome do arquivo que contém os dados a serem codificados ?\n");
-   scanf("%s", ent);
+      printf("Qual o nome do arquivo que contï¿½m os dados a serem codificados ?\n");
+      scanf("%s", ent);
 
-   printf("Qual o nome do arquivo de símbolos codificados?\n");
-   scanf("%s", codi);
+      printf("Qual o nome do arquivo de sï¿½mbolos codificados?\n");
+      scanf("%s", codi);
+   }
+   else{
+      K = atoi(argv[1]); // atoi converts a string to an integer
+      N = atoi(argv[2]);
+      strcpy(dicion,argv[3]); // strcpy copies a string
+      strcpy(ent,argv[4]);
+      strcpy(codi,argv[5]);
+   }
 
    pta = ler_arquivo(dicion,N,K);
 
@@ -53,8 +63,8 @@ int main()
 } /* fim do main */
 
 int codifica(double **pta, double *y, int N, int K){ 
-//Retorna o índice do vetor-código  que produz a menor distorção 
-//Dicionário (pta) - Vetor (y) - Número de vetores do dicionário (N)
+//Retorna o ï¿½ndice do vetor-cï¿½digo  que produz a menor distorï¿½ï¿½o 
+//Dicionï¿½rio (pta) - Vetor (y) - Nï¿½mero de vetores do dicionï¿½rio (N)
 
 int i,cod;
 double dist;
@@ -90,9 +100,9 @@ return dist;
 
 void codifica_arquivo(char entrada[], char saida[], double **x, int N, int K){
 /******************************************************************
-* Função que codifica os vetores do arquivo de nome "entrada" em  *
-* índices armazenados no arquivo de nomes "saída", de acordo com  *
-* o dicionário "x" de dimensão N,K.                               *
+* Funï¿½ï¿½o que codifica os vetores do arquivo de nome "entrada" em  *
+* ï¿½ndices armazenados no arquivo de nomes "saï¿½da", de acordo com  *
+* o dicionï¿½rio "x" de dimensï¿½o N,K.                               *
 ******************************************************************/
 
 FILE *entradap, *saidap;
