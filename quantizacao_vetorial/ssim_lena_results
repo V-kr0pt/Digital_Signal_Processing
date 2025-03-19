@@ -1,0 +1,21 @@
+N=16
+A SSIM entre as imagens é 0.669821
+
+N=32
+A SSIM entre as imagens é 0.711393
+
+N=64
+A SSIM entre as imagens é 0.746611
+
+N=128
+A SSIM entre as imagens é 0.769492
+
+N=256
+A SSIM entre as imagens é 0.785579
+
+N=512
+A SSIM entre as imagens é 0.904443
+
+N=1024
+A SSIM entre as imagens é 0.814262
+

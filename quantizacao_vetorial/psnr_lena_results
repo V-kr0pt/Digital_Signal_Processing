@@ -1,0 +1,28 @@
+N=16
+O erro médio quadrático é MSE = 217.763840
+A relação Sinal/Ruído de Pico é PSNR = 24.750946
+
+N=32
+O erro médio quadrático é MSE = 176.518539
+A relação Sinal/Ruído de Pico é PSNR = 25.662900
+
+N=64
+O erro médio quadrático é MSE = 157.411499
+A relação Sinal/Ruído de Pico é PSNR = 26.160439
+
+N=128
+O erro médio quadrático é MSE = 141.281891
+A relação Sinal/Ruído de Pico é PSNR = 26.629939
+
+N=256
+O erro médio quadrático é MSE = 132.092163
+A relação Sinal/Ruído de Pico é PSNR = 26.922033
+
+N=512
+O erro médio quadrático é MSE = 64.080383
+A relação Sinal/Ruído de Pico é PSNR = 30.063553
+
+N=1024
+O erro médio quadrático é MSE = 115.161743
+A relação Sinal/Ruído de Pico é PSNR = 27.517721
+
