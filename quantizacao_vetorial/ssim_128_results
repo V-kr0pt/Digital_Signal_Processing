@@ -1,0 +1,21 @@
+image=boat
+A SSIM entre as imagens é 0.754923
+
+image=frog
+A SSIM entre as imagens é 0.550663
+
+image=goldhill
+A SSIM entre as imagens é 0.737084
+
+image=gull
+A SSIM entre as imagens é 0.70307
+
+image=lena
+A SSIM entre as imagens é 0.769492
+
+image=mandrill
+A SSIM entre as imagens é 0.623538
+
+image=peppers
+A SSIM entre as imagens é 0.822888
+

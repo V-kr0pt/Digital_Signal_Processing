@@ -1,0 +1,28 @@
+image=boat
+O erro médio quadrático é MSE = 212.347534
+A relação Sinal/Ruído de Pico é PSNR = 24.860331
+
+image=frog
+O erro médio quadrático é MSE = 121.865662
+A relação Sinal/Ruído de Pico é PSNR = 27.271990
+
+image=goldhill
+O erro médio quadrático é MSE = 154.483444
+A relação Sinal/Ruído de Pico é PSNR = 26.241984
+
+image=gull
+O erro médio quadrático é MSE = 241.507294
+A relação Sinal/Ruído de Pico é PSNR = 24.301501
+
+image=lena
+O erro médio quadrático é MSE = 141.281891
+A relação Sinal/Ruído de Pico é PSNR = 26.629939
+
+image=mandrill
+O erro médio quadrático é MSE = 460.172775
+A relação Sinal/Ruído de Pico é PSNR = 21.501594
+
+image=peppers
+O erro médio quadrático é MSE = 148.331543
+A relação Sinal/Ruído de Pico é PSNR = 26.418468
+
