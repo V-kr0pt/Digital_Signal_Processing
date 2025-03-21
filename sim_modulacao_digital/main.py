@@ -10,7 +10,7 @@ def add_noise(signal, snr_db):
     return signal + noise
 
 
-def main(img, num_clusters, snr_db):
+def main(img, num_clusters, snr_db, bit_rate):
    
     # Compressão
     labels, centroids, dct_shape = compress_image(img, num_clusters)
@@ -19,11 +19,14 @@ def main(img, num_clusters, snr_db):
     compressed_data = labels.reshape(-1)  # Flatten the quantized DCT coefficients
     
     # Transformando os índices em binário
-    num_bits = int(np.ceil(np.log2(num_clusters)))  # Número de bits necessários
+    num_bits = int(np.ceil(np.log2(num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
     compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
+
+    # Tempo necessário para enviar todos os bits 
+    execution_time = num_bits/bit_rate
     
     # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
-    compressed_data_bin = compressed_data_bin[:, -num_bits:]   
+    compressed_data_bin = compressed_data_bin[:, -num_bits:]  # dim(compressed_data_bin) = (num_simbols, num_bits)  
     
     # Modulação
     modulated_signal = bpsk_modulation(compressed_data_bin.flatten())
@@ -51,7 +54,7 @@ def main(img, num_clusters, snr_db):
     reconstructed_img = np.clip(reconstructed_img, 0, 255) / 255.0
     img = img / 255.0  # Normalizar imagem original também
 
-    return reconstructed_img, received_signal, modulated_signal, demodulated_data
+    return reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time
 
 
 
@@ -62,7 +65,7 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    reconstructed_img, received_signal, modulated_signal, demodulated_data = main(img, 8, 10)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = main(img, 8, 10, 2)
 
 
     # Mostrar imagens lado a lado
@@ -78,15 +81,16 @@ if __name__ == '__main__':
     plt.show()
 
     # Sinais no domínio do tempo
-    fig, ax = plt.subplots(3, 1, figsize=(10, 6))
-    ax[0].plot(modulated_signal[:100], label="Sinal Modulado (BPSK)")
+    t = np.linspace(0, execution_time, len(modulated_signal))
+    fig, ax = plt.subplots(2, 1, figsize=(10, 6))
+    ax[0].plot(t, modulated_signal, label="Sinal Modulado (BPSK)")
     ax[0].legend()
 
-    ax[1].plot(received_signal[:100], label="Sinal Recebido com Ruído", color='r')
+    ax[1].plot(t, received_signal, label="Sinal Recebido com Ruído", color='r')
     ax[1].legend()
 
-    ax[2].plot(demodulated_data[:100], label="Sinal Demodulado", color='g')
-    ax[2].legend()
+    #ax[2].plot(t, demodulated_data, label="Sinal Demodulado", color='g')
+    #ax[2].legend()
 
     plt.show()
 
