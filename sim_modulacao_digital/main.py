@@ -19,27 +19,29 @@ def main(img, num_clusters, snr_db, bit_rate):
     compressed_data = labels.reshape(-1)  # Flatten the quantized DCT coefficients
     
     # Transformando os índices em binário
-    num_bits = int(np.ceil(np.log2(num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
+    num_bits_per_symbol = int(np.ceil(np.log2(num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
     compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
 
-    # Tempo necessário para enviar todos os bits 
-    execution_time = num_bits/bit_rate
     
     # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
-    compressed_data_bin = compressed_data_bin[:, -num_bits:]  # dim(compressed_data_bin) = (num_simbols, num_bits)  
+    compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, num_bits_per_symbol)
+    compressed_data_bin = compressed_data_bin.flatten()
+    # Tempo necessário para enviar todos os bits
+    total_data_num_bits = compressed_data_bin.size 
+    execution_time = total_data_num_bits/bit_rate  
     
     # Modulação
-    modulated_signal = bpsk_modulation(compressed_data_bin.flatten())
+    modulated_signal = bpsk_modulation(compressed_data_bin)
 
     # Transmissão com Ruído
     received_signal = add_noise(modulated_signal, snr_db)
 
     # Demodulação
-    demodulated_data_bin = bpsk_demodulation(received_signal).reshape(-1, num_bits).astype(np.uint8)
+    demodulated_data_bin = bpsk_demodulation(received_signal).reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
     # Reconverter binário para índices de clusters
     # Adicionar zeros à esquerda para completar 8 bits
-    demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits),dtype=np.uint8),
+    demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits_per_symbol),dtype=np.uint8),
                                       demodulated_data_bin], dtype=np.uint8)
     
     # Converter de binário para decimal
