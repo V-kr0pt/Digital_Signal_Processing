@@ -35,6 +35,7 @@ if uploaded_file:
     seconds_execution_time = execution_time % 60
     
     # Apresenta o tempo de execução para o usuário
+    st.write("O total de bits transmitido foi de ", len(modulated_signal), " bits")
     time_string = "O tempo necessário para enviar todos os bits foi de "
     if hours_execution_time > 0:
         time_string += f"{hours_execution_time:.0f} horas, "
@@ -42,6 +43,7 @@ if uploaded_file:
         time_string += f"{minutes_execution_time:.0f} minutos e "
     time_string += f"{seconds_execution_time:.0f} segundos"
     st.write(time_string)
+    st.write("Total de tempo em segundos: ", execution_time, " segundos")
     
     
     bit_time = 1 / bit_rate
@@ -54,9 +56,11 @@ if uploaded_file:
     num_points = int(len(t) * time_window / execution_time)
 
     ax[0].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post', label="Sinal Modulado (BPSK)")
+    ax[0].grid()
     ax[0].legend()
 
     ax[1].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post', label="Sinal Recebido com Ruído", color='r')
+    ax[1].grid()
     ax[1].legend()
 
     st.pyplot(fig)
