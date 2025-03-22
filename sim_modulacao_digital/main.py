@@ -11,53 +11,64 @@ def add_noise(signal, snr_db):
     return signal + noise
 
 
-def main(img, num_clusters, snr_db, bit_rate):
-   
-    # Compressão
-    labels, centroids, dct_shape = compress_image(img, num_clusters)
+class ImageTransmission:
+    def __init__(self, num_clusters, snr_db, bit_rate):
+        self.img = None
+        self.num_clusters = num_clusters
+        self.snr_db = snr_db
+        self.bit_rate = bit_rate
+        self.reconstructed_img = None
+        self.received_signal = None
+        self.modulated_signal = None
+        self.demodulated_data = None
+        self.execution_time = None
 
-    # Converter índices de clusters para binário
-    compressed_data = labels.reshape(-1)  # Flatten the quantized DCT coefficients
-    
-    # Transformando os índices em binário
-    num_bits_per_symbol = int(np.ceil(np.log2(num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
-    compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
+    def run(self, img):
+        self.img = img
+        # Compressão
+        labels, centroids, dct_shape = compress_image(self.img, self.num_clusters)
 
-    
-    # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
-    compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, num_bits_per_symbol)
-    compressed_data_bin = compressed_data_bin.flatten()
-    # Tempo necessário para enviar todos os bits
-    total_data_num_bits = compressed_data_bin.size 
-    execution_time = total_data_num_bits/bit_rate  
-    
-    # Modulação
-    modulated_signal = bpsk_modulation(compressed_data_bin)
+        # Converter índices de clusters para binário
+        compressed_data = labels.reshape(-1)  # Flatten the quantized DCT coefficients
 
-    # Transmissão com Ruído
-    received_signal = add_noise(modulated_signal, snr_db)
+        # Transformando os índices em binário
+        num_bits_per_symbol = int(np.ceil(np.log2(self.num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
+        compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
 
-    # Demodulação
-    demodulated_data_bin = bpsk_demodulation(received_signal).reshape(-1, num_bits_per_symbol).astype(np.uint8)
+        # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
+        compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, num_bits_per_symbol)
+        compressed_data_bin = compressed_data_bin.flatten()
+        # Tempo necessário para enviar todos os bits
+        total_data_num_bits = compressed_data_bin.size 
+        self.execution_time = total_data_num_bits/self.bit_rate  
 
-    # Reconverter binário para índices de clusters
-    # Adicionar zeros à esquerda para completar 8 bits
-    demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits_per_symbol),dtype=np.uint8),
-                                      demodulated_data_bin], dtype=np.uint8)
-    
-    # Converter de binário para decimal
-    demodulated_data = np.packbits(demodulated_data_bin, axis=1).flatten()
-    demodulated_data = demodulated_data[:demodulated_data_bin.size]  # Ajustar tamanho
+        # Modulação
+        self.modulated_signal = bpsk_modulation(compressed_data_bin)
 
-    # Garantir que os índices estejam no intervalo válido
-    #demodulated_data = np.clip(demodulated_data, 0, num_clusters - 1)
+        # Transmissão com Ruído
+        self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
-    # Reconstrução da Imagem
-    reconstructed_img = reconstruct_image(demodulated_data, centroids, dct_shape)
-    reconstructed_img = np.clip(reconstructed_img, 0, 255) / 255.0
-    img = img / 255.0  # Normalizar imagem original também
+        # Demodulação
+        demodulated_data_bin = bpsk_demodulation(self.received_signal).reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
-    return reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time
+        # Reconverter binário para índices de clusters
+        # Adicionar zeros à esquerda para completar 8 bits
+        demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits_per_symbol),dtype=np.uint8),
+                                          demodulated_data_bin], dtype=np.uint8)
+
+        # Converter de binário para decimal
+        self.demodulated_data = np.packbits(demodulated_data_bin, axis=1).flatten()
+        self.demodulated_data = self.demodulated_data[:demodulated_data_bin.size]  # Ajustar tamanho
+
+        # Garantir que os índices estejam no intervalo válido
+        #demodulated_data = np.clip(demodulated_data, 0, num_clusters - 1)
+
+        # Reconstrução da Imagem
+        self.reconstructed_img = reconstruct_image(self.demodulated_data, centroids, dct_shape)
+        self.reconstructed_img = np.clip(self.reconstructed_img, 0, 255) / 255.0
+        self.img = self.img / 255.0  # Normalizar imagem original também
+
+        return self.reconstructed_img, self.received_signal, self.modulated_signal, self.demodulated_data, self.execution_time
 
 
 
@@ -68,7 +79,8 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = main(img, 8, 10, 2)
+    image_transmission = ImageTransmission(num_clusters=8, snr_db=10, bit_rate=2)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
 
 
     # Mostrar imagens lado a lado
