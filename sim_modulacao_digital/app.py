@@ -14,29 +14,34 @@ st.title("Visualização Interativa da Transmissão Digital de Imagens 📡🖼�
 uploaded_file = st.file_uploader("Escolha uma imagem", type=["png", "jpg", "jpeg"])
 
 if uploaded_file:
+    st.subheader("Compreessão da Imagem")
     img = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
     img = cv2.resize(img, (128, 128))
     
     # Lista de potências de 2 dentro do intervalo desejado
     potencias_de_2 = [2**i for i in range(1, 9)]  # De 2^1 (2) até 2^8 (256)
+    algo_options = ['DCT', 'Vetorização']
 
     # Menu suspenso para selecionar o número de clusters
+    algorithm = st.selectbox("Algoritmo de Compressão", algo_options, index=0) 
     num_clusters = st.selectbox("Número de Clusters (Vetores)", potencias_de_2, index=3)  # Valor padrão: 2^4 = 16
 
+
+    st.subheader("Configurações da Transmissão")
     # Configurações do usuário
-    #num_clusters = st.slider("Número de Clusters (Vetores)", min_value=2, max_value=256, value=16, step=2)
+    carrier_power = st.slider("Potência da Portadora (dB)", min_value=-50, max_value=0, value=0)
     noise_power = st.slider("Potência do Ruído (dB)", min_value=-50, max_value=0, value=10)
     bit_rate = st.slider("Bit Rate (bit/s ou bps)", min_value=1, max_value=1024, value=4)
 
     # Executar o algoritmo principal
-    image_transmission = ImageTransmission(num_clusters, noise_power, bit_rate)
+    image_transmission = ImageTransmission(num_clusters, carrier_power, noise_power, bit_rate)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time= image_transmission.run(img)
 
     # Mostrar imagens lado a lado
     st.image([img, reconstructed_img], caption=["Imagem Original", "Imagem Reconstruída"], width=300)
 
     # Mostrar gráficos dos sinais
-    st.subheader("Sinais no Domínio do Tempo")
+    st.markdown("### Sinais no Domínio do Tempo")
     hours_execution_time = execution_time // 3600
     minutes_execution_time = (execution_time % 3600) // 60
     seconds_execution_time = execution_time % 60
