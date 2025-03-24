@@ -23,7 +23,7 @@ class ImageTransmission:
         self.demodulated_data = None
         self.execution_time = None
 
-        # check if num_clusters is a power of 2
+        # check se o num_clursters é uma potência de dois
         if not np.log2(num_clusters).is_integer():
             raise ValueError("O número de clusters deve ser uma potência de 2")
 
