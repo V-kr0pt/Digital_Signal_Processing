@@ -12,10 +12,11 @@ def add_noise(signal, noise_power_db):
 
 
 class ImageTransmission:
-    def __init__(self, num_clusters, snr_db, bit_rate):
+    def __init__(self, num_clusters, carrier_power, noise_power, bit_rate):
         self.img = None
         self.num_clusters = num_clusters
-        self.snr_db = snr_db
+        self.snr_db = noise_power
+        self.carrier_power = carrier_power
         self.bit_rate = bit_rate
         self.reconstructed_img = None
         self.received_signal = None
@@ -47,13 +48,14 @@ class ImageTransmission:
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Modulação
-        self.modulated_signal = bpsk_modulation(compressed_data_bin)
+        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, 1, self.bit_rate)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
         # Demodulação
-        demodulated_data_bin = bpsk_demodulation(self.received_signal).reshape(-1, num_bits_per_symbol).astype(np.uint8)
+        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, 1, self.bit_rate)
+        demodulated_data_bin = demodulated_data_bin.reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
         # Reconverter binário para índices de clusters
         # Adicionar zeros à esquerda para completar 8 bits
@@ -83,7 +85,7 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    image_transmission = ImageTransmission(num_clusters=10, snr_db=-4, bit_rate=1)
+    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=1)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
 
 
