@@ -4,10 +4,10 @@ import numpy as np
 from compression import compress_image, reconstruct_image
 from modulation import bpsk_modulation, bpsk_demodulation
 
-def add_noise(signal, snr_db):
+def add_noise(signal, noise_power_db):
     np.random.seed(42)
-    snr_linear = 10 ** (snr_db / 10)
-    noise = np.random.normal(0, np.sqrt(1 / (2 * snr_linear)), signal.shape)
+    noise_power_linear = 10 ** (noise_power_db / 10)
+    noise = np.random.normal(0, noise_power_linear, signal.shape)
     return signal + noise
 
 

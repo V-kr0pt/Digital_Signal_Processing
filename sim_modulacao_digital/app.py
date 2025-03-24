@@ -4,7 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 
-from main import main
+from main import ImageTransmission
 
 
 # Streamlit Interface
@@ -18,12 +18,13 @@ if uploaded_file:
     img = cv2.resize(img, (128, 128))
     
     # Configurações do usuário
-    num_clusters = st.slider("Nível de Compressão (Número de Clusters)", min_value=4, max_value=128, value=16, step=2)
-    snr_db = st.slider("SNR (dB)", min_value=-5, max_value=30, value=10)
-    bit_rate = st.slider("Bit Rate", min_value=1, max_value=1024, value=4)
+    num_clusters = st.slider("Número de Clusters (Vetores)", min_value=4, max_value=128, value=16, step=2)
+    noise_power = st.slider("Potência do Ruído (dB)", min_value=-50, max_value=0, value=10)
+    bit_rate = st.slider("Bit Rate (bit/s ou bps)", min_value=1, max_value=1024, value=4)
 
     # Executar o algoritmo principal
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time= main(img, num_clusters, snr_db, bit_rate)
+    image_transmission = ImageTransmission(num_clusters, noise_power, bit_rate)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time= image_transmission.run(img)
 
     # Mostrar imagens lado a lado
     st.image([img, reconstructed_img], caption=["Imagem Original", "Imagem Reconstruída"], width=300)
