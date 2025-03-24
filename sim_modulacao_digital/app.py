@@ -17,8 +17,14 @@ if uploaded_file:
     img = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
     img = cv2.resize(img, (128, 128))
     
+    # Lista de potências de 2 dentro do intervalo desejado
+    potencias_de_2 = [2**i for i in range(1, 9)]  # De 2^1 (2) até 2^8 (256)
+
+    # Menu suspenso para selecionar o número de clusters
+    num_clusters = st.selectbox("Número de Clusters (Vetores)", potencias_de_2, index=3)  # Valor padrão: 2^4 = 16
+
     # Configurações do usuário
-    num_clusters = st.slider("Número de Clusters (Vetores)", min_value=4, max_value=128, value=16, step=2)
+    #num_clusters = st.slider("Número de Clusters (Vetores)", min_value=2, max_value=256, value=16, step=2)
     noise_power = st.slider("Potência do Ruído (dB)", min_value=-50, max_value=0, value=10)
     bit_rate = st.slider("Bit Rate (bit/s ou bps)", min_value=1, max_value=1024, value=4)
 

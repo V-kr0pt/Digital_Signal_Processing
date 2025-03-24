@@ -23,6 +23,10 @@ class ImageTransmission:
         self.demodulated_data = None
         self.execution_time = None
 
+        # check if num_clusters is a power of 2
+        if not np.log2(num_clusters).is_integer():
+            raise ValueError("O número de clusters deve ser uma potência de 2")
+
     def run(self, img):
         self.img = img
         # Compressão
@@ -79,7 +83,7 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    image_transmission = ImageTransmission(num_clusters=8, snr_db=10, bit_rate=2)
+    image_transmission = ImageTransmission(num_clusters=10, snr_db=-4, bit_rate=1)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
 
 
