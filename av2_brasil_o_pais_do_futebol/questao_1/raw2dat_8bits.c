@@ -1,7 +1,7 @@
 /******************************************************************
 *	Programa raw2dat.c                                             *
 *                                                                 *
-*  Transforma um arquivo de áudio binário 16 bits em um arquivo   *
+*  Transforma um arquivo de áudio binário  8 bits em um arquivo   *
 *  de texto (-1 <= x < +1).                                       *
 *                                                                 *
 *  Autor: Waslon Terllizzie Araújo Lopes                          *
@@ -20,9 +20,8 @@ int main (int argc, char **argv){
 
 FILE *f,*saida;
 char amos[cnome],quant[cnome];
-int16_t ampl;
-int8_t bytes[2];
-unsigned int t, n_amost;
+int8_t bytes[1];
+unsigned int t;
 double y;
 
 
@@ -42,22 +41,10 @@ saida = fopen(argv[2], "wb");
 }
 
 for (t = 0; !feof(f); ++t) {
-    fread(bytes, 2, sizeof(int8_t), f);
-}
-
-
-n_amost = t-1;
-
-rewind(f);
-
-
-for (t = 0; t < n_amost; ++t) {
-    fread(bytes, 2, sizeof(int8_t), f);
-	 ampl = (bytes[1] << 8) + bytes[0];
-    y = (1.0*ampl)/INT8_MAX;
+    fread(bytes, 1, sizeof(int8_t), f);
+    y = (1.0*bytes[0])/INT8_MAX;
     fprintf(saida,"%.10f \n",y); 
 }
-
 fclose(f);
 fclose(saida);
 return(1);
