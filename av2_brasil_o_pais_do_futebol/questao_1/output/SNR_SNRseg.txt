@@ -1,0 +1,20 @@
+quantizador
+SNR = 3.58 dB
+SNRseg = -0.15 dB
+
+alaw
+SNR = 13.95 dB
+SNRseg = 13.42 dB
+
+mulaw
+SNR = 13.40 dB
+SNRseg = 13.71 dB
+
+qv
+SNR = 20.01 dB
+SNRseg = 25.66 dB
+
+dct
+SNR = 23.69 dB
+SNRseg = 19.73 dB
+
