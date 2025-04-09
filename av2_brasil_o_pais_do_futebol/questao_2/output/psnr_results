@@ -1,0 +1,36 @@
+Dic=dic_all | N=512
+lena_512_dic_all.decod.pgm
+O erro médio quadrático é MSE = 98.143677
+A relação Sinal/Ruído de Pico é PSNR = 28.212180
+
+richarlison_512_dic_all.decod.pgm
+O erro médio quadrático é MSE = 79.104691
+A relação Sinal/Ruído de Pico é PSNR = 29.148781
+
+Dic=dic_all | N=1024
+lena_1024_dic_all.decod.pgm
+O erro médio quadrático é MSE = 115.161743
+A relação Sinal/Ruído de Pico é PSNR = 27.517721
+
+richarlison_1024_dic_all.decod.pgm
+O erro médio quadrático é MSE = 68.289017
+A relação Sinal/Ruído de Pico é PSNR = 29.787295
+
+Dic=dic_lena | N=512
+lena_512_dic_lena.decod.pgm
+O erro médio quadrático é MSE = 63.543549
+A relação Sinal/Ruído de Pico é PSNR = 30.100089
+
+richarlison_512_dic_lena.decod.pgm
+O erro médio quadrático é MSE = 303.209152
+A relação Sinal/Ruído de Pico é PSNR = 23.313381
+
+Dic=dic_lena | N=1024
+lena_1024_dic_lena.decod.pgm
+O erro médio quadrático é MSE = 46.608841
+A relação Sinal/Ruído de Pico é PSNR = 31.446121
+
+richarlison_1024_dic_lena.decod.pgm
+O erro médio quadrático é MSE = 261.563599
+A relação Sinal/Ruído de Pico é PSNR = 23.955031
+

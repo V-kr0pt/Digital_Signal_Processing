@@ -1,0 +1,28 @@
+Dic=dic_all | N=512
+lena_512_dic_all.decod.pgm
+A SSIM entre as imagens é 0.838882
+
+richarlison_512_dic_all.decod.pgm
+A SSIM entre as imagens é 0.886698
+
+Dic=dic_all | N=1024
+lena_1024_dic_all.decod.pgm
+A SSIM entre as imagens é 0.814262
+
+richarlison_1024_dic_all.decod.pgm
+A SSIM entre as imagens é 0.902251
+
+Dic=dic_lena | N=512
+lena_512_dic_lena.decod.pgm
+A SSIM entre as imagens é 0.905467
+
+richarlison_512_dic_lena.decod.pgm
+A SSIM entre as imagens é 0.831372
+
+Dic=dic_lena | N=1024
+lena_1024_dic_lena.decod.pgm
+A SSIM entre as imagens é 0.93613
+
+richarlison_1024_dic_lena.decod.pgm
+A SSIM entre as imagens é 0.854741
+
