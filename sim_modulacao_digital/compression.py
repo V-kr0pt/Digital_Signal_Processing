@@ -20,12 +20,6 @@ def compress_image(img, num_clusters):
     
     # Return the labels, centroids, and original DCT shape
     return labels, centroids, dct_img.shape
-    
-    # Replace each DCT coefficient with its corresponding centroid value
-    quantized_dct = kmeans.cluster_centers_[kmeans.labels_].reshape(dct_img.shape)
-    
-    # Return the quantized DCT coefficients, centroids, and original DCT shape
-    return quantized_dct, kmeans.cluster_centers_, dct_img.shape
 
 
 def reconstruct_image(centroid_index, centroids, shape):
