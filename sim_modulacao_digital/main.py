@@ -47,14 +47,16 @@ class ImageTransmission:
         total_data_num_bits = compressed_data_bin.size 
         self.execution_time = total_data_num_bits/self.bit_rate  
 
+        freq_carrier = 1e3  # Frequência da portadora (Hz)
+
         # Modulação
-        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, 100, self.bit_rate)
+        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, freq_carrier, self.bit_rate)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
         # Demodulação
-        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, 100, self.bit_rate)
+        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, freq_carrier, self.bit_rate)
         demodulated_data_bin = demodulated_data_bin.reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
         # Reconverter binário para índices de clusters
