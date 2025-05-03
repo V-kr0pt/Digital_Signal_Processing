@@ -3,7 +3,7 @@ import numpy as np
 def db_to_linear(db):
     return 10 ** (db / 10)
 
-def create_carrier_signal(data_length, carrier_power, carrier_freq, sampling_rate, bit_rate):
+def create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate):
     """
     Gera um sinal senoidal com uma dada potência e frequência.
 
@@ -18,10 +18,6 @@ def create_carrier_signal(data_length, carrier_power, carrier_freq, sampling_rat
     """
     carrier_power = db_to_linear(carrier_power)  # Potência da portadora em escala linear
     A = np.sqrt(2 * carrier_power)  # Amplitude da portadora
-    
-    duration = 1 / bit_rate
-    total_duration = duration * data_length
-    number_of_points = int(sampling_rate * total_duration)
-    t = np.linspace(0, total_duration, number_of_points, endpoint=False)
+    t = np.arange(total_samples) / sampling_rate
 
     return A * np.sin(2 * np.pi * carrier_freq * t)

@@ -2,7 +2,10 @@ import numpy as np
 from utils import create_carrier_signal
 
 
-def bpsk_modulation(data, carrier_power, carrier_freq, duration):
+NYQUIST_RATE = 4  # Taxa de Nyquist
+
+
+def bpsk_modulation(data, carrier_power, carrier_freq, bit_rate):
     """
     Modula os dados binários usando BPSK com uma portadora senoidal.
 
@@ -14,17 +17,21 @@ def bpsk_modulation(data, carrier_power, carrier_freq, duration):
     Returns:
         np.array: Sinal modulado BPSK.
     """
+    # Fixar o sampling_rate como 4 vezes a frequência da portadora
+    sampling_rate = NYQUIST_RATE * carrier_freq
 
-    # Fixar o sampling_rate como 10 vezes a frequência da portadora
-    sampling_rate = 4 * carrier_freq
+    # Calcular o número total de amostras
+    bit_period = 1 / bit_rate
+    number_of_samples_per_bit = int(sampling_rate * bit_period)
+    total_samples = len(data) * number_of_samples_per_bit
     
-    carrier = create_carrier_signal(len(data), carrier_power, carrier_freq, sampling_rate, duration)
-    
+    # Gerar a portadora senoidal    
+    carrier = create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate)
+
     # codificação bpsk
     data = bpsk_codification(data)
 
     # Repetir os bits para corresponder ao número de amostras por bit
-    number_of_samples_per_bit = int(sampling_rate * duration)
     bit_repeated = np.repeat(data, number_of_samples_per_bit)
 
     return carrier * bit_repeated
@@ -42,21 +49,24 @@ def bpsk_demodulation(received_signal, carrier_power, carrier_freq, bit_rate):
     Returns:
         np.array: Dados binários demodulados.
     """
-    duration = 1 / bit_rate # duração de cada bit
+    bit_period = 1 / bit_rate # duração de cada bit
 
-    sampling_rate = 4 * carrier_freq
-
+    sampling_rate = NYQUIST_RATE * carrier_freq
+    number_of_samples_per_bit = int(sampling_rate * bit_period)
+    total_samples = len(received_signal) # Número total de amostras
+    
     # Comprimento dos dados
-    data_length = len(received_signal)
+    #data_length = len(received_signal)/(sampling_rate*bit_period)
+    #data_length = int(data_length) # Arredondar para o inteiro mais próximo
 
     # Gerar a portadora senoidal local
-    carrier = create_carrier_signal(data_length, carrier_power, carrier_freq, sampling_rate, bit_rate)
+    carrier = create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate)
 
     # Multiplicar o sinal recebido pela portadora (correlação)
     correlated_signal = received_signal * carrier
 
     # Número de amostras por bit
-    samples_per_bit = int(sampling_rate * duration)
+    samples_per_bit = int(sampling_rate * bit_period)
 
     # Integrar o sinal para cada bit
     demodulated_bits = []

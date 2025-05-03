@@ -4,9 +4,9 @@ import numpy as np
 from compression import compress_image, reconstruct_image
 from modulation import bpsk_modulation, bpsk_demodulation
 
-def add_noise(signal, noise_power_db):
+def add_noise(signal, noise_power):
     np.random.seed(42)
-    noise_power_linear = 10 ** (noise_power_db / 10)
+    noise_power_linear = 1e-3* 10 ** (noise_power / 10) # convert from dBm to linear scale
     noise = np.random.normal(0, noise_power_linear, signal.shape)
     return signal + noise
 
@@ -41,20 +41,20 @@ class ImageTransmission:
         compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
 
         # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
-        compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, num_bits_per_symbol)
+        compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, ) each simbol has num_bits_per_symbol bits
         compressed_data_bin = compressed_data_bin.flatten()
         # Tempo necessário para enviar todos os bits
         total_data_num_bits = compressed_data_bin.size 
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Modulação
-        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, 1, self.bit_rate)
+        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, 100, self.bit_rate)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
         # Demodulação
-        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, 1, self.bit_rate)
+        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, 100, self.bit_rate)
         demodulated_data_bin = demodulated_data_bin.reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
         # Reconverter binário para índices de clusters
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=1)
+    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=2)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
 
 
