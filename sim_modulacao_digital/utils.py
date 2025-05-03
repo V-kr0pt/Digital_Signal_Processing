@@ -1,7 +1,7 @@
 import numpy as np
 
-def db_to_linear(db):
-    return 10 ** (db / 10)
+def dbm_to_linear(dbm_power):
+    return 1e-3*10 ** (dbm_power / 10)
 
 def create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate):
     """
@@ -16,7 +16,7 @@ def create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_r
     Returns:
         np.array: Sinal senoidal.
     """
-    carrier_power = db_to_linear(carrier_power)  # Potência da portadora em escala linear
+    carrier_power = dbm_to_linear(carrier_power)  # Potência da portadora em escala linear
     A = np.sqrt(2 * carrier_power)  # Amplitude da portadora
     t = np.arange(total_samples) / sampling_rate
 

@@ -3,10 +3,11 @@ import numpy as np
 
 from compression import compress_image, reconstruct_image
 from modulation import bpsk_modulation, bpsk_demodulation
+from utils import dbm_to_linear
 
 def add_noise(signal, noise_power):
     np.random.seed(42)
-    noise_power_linear = 1e-3* 10 ** (noise_power / 10) # convert from dBm to linear scale
+    noise_power_linear = dbm_to_linear(noise_power) # convert from dBm to linear scale
     noise = np.random.normal(0, noise_power_linear, signal.shape)
     return signal + noise
 

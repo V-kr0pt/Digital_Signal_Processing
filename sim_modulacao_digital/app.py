@@ -29,8 +29,8 @@ if uploaded_file:
 
     st.subheader("Configurações da Transmissão")
     # Configurações do usuário
-    carrier_power = st.slider("Potência da Portadora (dB)", min_value=-50, max_value=0, value=0)
-    noise_power = st.slider("Potência do Ruído (dB)", min_value=-50, max_value=0, value=10)
+    carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=10, value=0)
+    noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=10, value=10)
     bit_rate = st.slider("Bit Rate (bit/s ou bps)", min_value=1, max_value=1024, value=4)
 
     # Executar o algoritmo principal
