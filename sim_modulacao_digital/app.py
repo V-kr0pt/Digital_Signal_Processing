@@ -29,13 +29,16 @@ if uploaded_file:
 
     st.subheader("Configurações da Transmissão")
     # Configurações do usuário
+    modulation_method = st.selectbox("Escolha o método de modulação", ["ASK", "BPSK", "QPSK", "8PSK"], index=0)
     carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=10, value=0)
     noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=10, value=10)
-    bit_rate = st.slider("Bit Rate (bit/s ou bps)", min_value=1, max_value=1024, value=4)
+    list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 800, 1000,
+                                    1250, 2000, 2500, 3125, 4000, 5000, 6250, 10000, 12500]
+    symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options)
 
     # Executar o algoritmo principal
-    image_transmission = ImageTransmission(num_clusters, carrier_power, noise_power, bit_rate)
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time= image_transmission.run(img)
+    image_transmission = ImageTransmission(num_clusters, modulation_method, carrier_power, noise_power, symbol_rate)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, compressed_data_bin, execution_time= image_transmission.run(img)
 
     # Mostrar imagens lado a lado
     st.image([img, reconstructed_img], caption=["Imagem Original", "Imagem Reconstruída"], width=300)
@@ -58,21 +61,25 @@ if uploaded_file:
     st.write("Total de tempo em segundos: ", execution_time, " segundos")
     
     
-    bit_time = 1 / bit_rate
-    time_window = st.number_input("Tempo de Execução (s)", min_value=float(2*bit_time),
-                                   max_value=execution_time, value=float(2*bit_time), step=float(bit_time))
+    symbol_time = 1 / symbol_rate  # Tempo de símbolo
+    time_window = st.number_input("Tempo de Execução (s)", min_value=float(2*symbol_time),
+                                   max_value=execution_time, value=float(2*symbol_time), step=float(symbol_time))
     
-    fig, ax = plt.subplots(2, 1, figsize=(10, 6))
+    fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
     t = np.linspace(0, execution_time, len(modulated_signal))
     num_points = int(len(t) * time_window / execution_time)
 
-    ax[0].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post', label="Sinal Modulado (BPSK)")
+    ax[0].plot(t[:num_points], compressed_data_bin[:num_points], drawstyle='steps-post', label="Dados Binários Transmitidos")
     ax[0].grid()
     ax[0].legend()
-
-    ax[1].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post', label="Sinal Recebido com Ruído", color='r')
+    
+    ax[1].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post', label=f"Sinal Modulado {modulation_method}")
     ax[1].grid()
     ax[1].legend()
+
+    ax[2].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post', label="Sinal Recebido com Ruído", color='r')
+    ax[2].grid()
+    ax[2].legend()
 
     st.pyplot(fig)

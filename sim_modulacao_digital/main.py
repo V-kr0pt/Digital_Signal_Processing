@@ -13,15 +13,15 @@ def add_noise(signal, noise_power):
 
 
 class ImageTransmission:
-    def __init__(self, num_clusters, modulation_method, carrier_power, noise_power, bit_rate):
+    def __init__(self, num_clusters, modulation_method, carrier_power, noise_power, symbol_rate):
         self.img = None
         self.num_clusters = num_clusters
         self.snr_db = noise_power
         self.carrier_power = carrier_power
-        self.bit_rate = bit_rate
-        self.fc = 1e3  # Frequência da portadora (Hz)
+        self.symbol_rate = symbol_rate
+        self.fc = 1e4  # Frequência da portadora (Hz)
         self.fs = 1e5  # Frequência de amostragem (Hz)
-        self.samples_per_symbol = 100
+        #self.samples_per_symbol = 100
         self.M = 4 # ordem de modulação PSK
         self.reconstructed_img = None
         self.received_signal = None
@@ -63,10 +63,14 @@ class ImageTransmission:
         self.compressed_data_bin = compressed_data_bin.flatten()
         
         # Tempo necessário para enviar todos os bits
+        self.bit_rate = self.symbol_rate * num_bits_per_symbol  # bits/s
         total_data_num_bits = self.compressed_data_bin.size 
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Modulação
+        self.samples_per_symbol = int(self.fs / self.symbol_rate)
+        print(f"{self.fs / self.symbol_rate}")
+        print(f"Samples per symbol: {self.samples_per_symbol}")
         self.modulated_signal = psk_modulation(self.compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
 
         # Transmissão com Ruído
