@@ -13,14 +13,14 @@ def add_noise(signal, noise_power):
 
 
 class ImageTransmission:
-    def __init__(self, num_clusters, carrier_power, noise_power, bit_rate):
+    def __init__(self, num_clusters, modulation_method, carrier_power, noise_power, bit_rate):
         self.img = None
         self.num_clusters = num_clusters
         self.snr_db = noise_power
         self.carrier_power = carrier_power
         self.bit_rate = bit_rate
         self.fc = 1e3  # Frequência da portadora (Hz)
-        self.fs = 1e4  # Frequência de amostragem (Hz)
+        self.fs = 1e5  # Frequência de amostragem (Hz)
         self.samples_per_symbol = 100
         self.M = 4 # ordem de modulação PSK
         self.reconstructed_img = None
@@ -28,6 +28,19 @@ class ImageTransmission:
         self.modulated_signal = None
         self.demodulated_data = None
         self.execution_time = None
+
+        if modulation_method != 'ASK':
+            if modulation_method == 'BPSK':
+                self.M = 2
+            elif modulation_method == 'QPSK':
+                self.M = 4
+            elif modulation_method == '8PSK':
+                self.M = 8
+            else:
+                raise ValueError("Método de modulação inválido. Escolha entre 'ASK', 'BPSK', 'QPSK' ou '8PSK'.")
+        else:
+            ...
+
 
         # check se o num_clursters é uma potência de dois
         if not np.log2(num_clusters).is_integer():
@@ -47,21 +60,22 @@ class ImageTransmission:
 
         # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
         compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, ) each simbol has num_bits_per_symbol bits
-        compressed_data_bin = compressed_data_bin.flatten()
+        self.compressed_data_bin = compressed_data_bin.flatten()
         
         # Tempo necessário para enviar todos os bits
-        total_data_num_bits = compressed_data_bin.size 
+        total_data_num_bits = self.compressed_data_bin.size 
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Modulação
-        self.modulated_signal = psk_modulation(compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
+        self.modulated_signal = psk_modulation(self.compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
         # Demodulação
         demodulated_data_bin = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
-        demodulated_data_bin = demodulated_data_bin.reshape(-1, num_bits_per_symbol).astype(np.uint8)
+        # garanto que o tamanho é o sem padding adicionado durante a transmissão e recrio os vetores do dicionário
+        demodulated_data_bin = demodulated_data_bin[:total_data_num_bits].reshape(-1, num_bits_per_symbol).astype(np.uint8) 
 
         # Reconverter binário para índices de clusters
         # Adicionar zeros à esquerda para completar 8 bits
@@ -80,7 +94,7 @@ class ImageTransmission:
         self.reconstructed_img = np.clip(self.reconstructed_img, 0, 255) / 255.0
         self.img = self.img / 255.0  # Normalizar imagem original também
 
-        return self.reconstructed_img, self.received_signal, self.modulated_signal, self.demodulated_data, self.execution_time
+        return self.reconstructed_img, self.received_signal, self.modulated_signal, self.demodulated_data, self.compressed_data_bin, self.execution_time
 
 
 
@@ -91,19 +105,28 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=100)
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
+    bit_rate = 100
+    modulation_method='8PSK'
+    image_transmission = ImageTransmission(num_clusters=16, modulation_method=modulation_method, carrier_power=1, noise_power=-4, bit_rate=bit_rate)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, compressed_data_bin, execution_time = image_transmission.run(img)
 
+    fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
-    # Mostrar imagens lado a lado
-    fig, ax = plt.subplots(1, 2, figsize=(10, 6))
-    ax[0].imshow(img, cmap='gray')
-    ax[0].set_title("Imagem Original")
-    ax[0].axis('off')
+    time_window = 2* bit_rate
+    t = np.linspace(0, execution_time, len(modulated_signal))
+    num_points = int(len(t) * time_window / execution_time)
 
-    ax[1].imshow(reconstructed_img, cmap='gray')
-    ax[1].set_title("Imagem Reconstruída")
-    ax[1].axis('off')
+    ax[0].plot(t[:num_points], compressed_data_bin[:num_points], drawstyle='steps-post', label="Dados Binários Transmitidos")
+    ax[0].grid()
+    ax[0].legend()
+    
+    ax[1].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post', label=f"Sinal Modulado {modulation_method}")
+    ax[1].grid()
+    ax[1].legend()
+
+    ax[2].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post', label="Sinal Recebido com Ruído", color='r')
+    ax[2].grid()
+    ax[2].legend()
 
     plt.show()
 

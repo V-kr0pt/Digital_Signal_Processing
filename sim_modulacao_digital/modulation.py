@@ -24,7 +24,15 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
 
     # data should be organized in groups of log2(modulation_order)
     symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
-    binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+    try:
+        binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+    except:
+        # Se não for possível fazer o reshape, adiciona zeros à direita
+        # Adiciona zeros à direita para completar o último símbolo
+        padding_length = symbol_length - (len(data) % symbol_length)
+        if padding_length < symbol_length:
+            data = np.concatenate((data, np.zeros(padding_length, dtype=data.dtype)))
+        binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
 
     # Convertendo os símbolos binários para inteiros
      # Converte os símbolos binários para inteiros
