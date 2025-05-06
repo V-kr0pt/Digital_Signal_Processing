@@ -2,7 +2,7 @@
 import numpy as np
 
 from compression import compress_image, reconstruct_image
-from modulation import bpsk_modulation, bpsk_demodulation
+from modulation import bpsk_modulation, bpsk_demodulation, psk_modulation, psk_demodulation
 from utils import dbm_to_linear
 
 def add_noise(signal, noise_power):
@@ -19,6 +19,10 @@ class ImageTransmission:
         self.snr_db = noise_power
         self.carrier_power = carrier_power
         self.bit_rate = bit_rate
+        self.fc = 1e3  # Frequência da portadora (Hz)
+        self.fs = 1e4  # Frequência de amostragem (Hz)
+        self.samples_per_symbol = 100
+        self.M = 4 # ordem de modulação PSK
         self.reconstructed_img = None
         self.received_signal = None
         self.modulated_signal = None
@@ -44,20 +48,19 @@ class ImageTransmission:
         # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
         compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, ) each simbol has num_bits_per_symbol bits
         compressed_data_bin = compressed_data_bin.flatten()
+        
         # Tempo necessário para enviar todos os bits
         total_data_num_bits = compressed_data_bin.size 
         self.execution_time = total_data_num_bits/self.bit_rate  
 
-        freq_carrier = 1e3  # Frequência da portadora (Hz)
-
         # Modulação
-        self.modulated_signal = bpsk_modulation(compressed_data_bin, self.carrier_power, freq_carrier, self.bit_rate)
+        self.modulated_signal = psk_modulation(compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
         # Demodulação
-        demodulated_data_bin = bpsk_demodulation(self.received_signal, self.carrier_power, freq_carrier, self.bit_rate)
+        demodulated_data_bin = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
         demodulated_data_bin = demodulated_data_bin.reshape(-1, num_bits_per_symbol).astype(np.uint8)
 
         # Reconverter binário para índices de clusters
@@ -88,7 +91,7 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=2)
+    image_transmission = ImageTransmission(num_clusters=16, carrier_power=1, noise_power=-4, bit_rate=100)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, execution_time = image_transmission.run(img)
 
 
@@ -105,7 +108,7 @@ if __name__ == '__main__':
     plt.show()
 
     # Sinais no domínio do tempo
-    t = np.linspace(0, execution_time, len(modulated_signal))
+    t = np.linspace(0, 0.2, len(modulated_signal))
     fig, ax = plt.subplots(2, 1, figsize=(10, 6))
     ax[0].plot(t, modulated_signal, label="Sinal Modulado (BPSK)")
     ax[0].legend()

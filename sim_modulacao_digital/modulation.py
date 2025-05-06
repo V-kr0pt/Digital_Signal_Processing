@@ -1,88 +1,85 @@
 import numpy as np
-from utils import create_carrier_signal
+from utils import bits_to_int
 
+#  Função para codificação PSK
+def psk_modulate(symbols, modulation_order):
+    phases = 2 * np.pi * symbols / modulation_order
+    return np.exp(1j * phases)  
 
-NYQUIST_RATE = 4  # Taxa de Nyquist
-
-
-def bpsk_modulation(data, carrier_power, carrier_freq, bit_rate):
+def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, fc=1e3, fs=1e4):
     """
-    Modula os dados binários usando BPSK com uma portadora senoidal.
+    Modula os dados binários usando PSK com uma portadora senoidal.
 
     Args:
         data (array): Dados binários (0s e 1s).
-        carrier_freq (float): Frequência da portadora (Hz).
-        duration (float): Duração de cada bit (segundos).
-
+        modulation_order (int): Ordem da modulação PSK (ex: 2 para BPSK, 4 para QPSK, etc.).
+        samples_per_symbol (int): Número de amostras por símbolo.
+        carrier_power (float): Potência da portadora.
+        fc (float): Frequência da portadora (Hz).
+        fs (float): Frequência de amostragem (Hz).
     Returns:
-        np.array: Sinal modulado BPSK.
+        np.array: Sinal modulado PSK
     """
-    # Fixar o sampling_rate como 4 vezes a frequência da portadora
-    sampling_rate = NYQUIST_RATE * carrier_freq
+   
 
-    # Calcular o número total de amostras
-    bit_period = 1 / bit_rate
-    number_of_samples_per_bit = int(sampling_rate * bit_period)
-    total_samples = len(data) * number_of_samples_per_bit
+    # data should be organized in groups of log2(modulation_order)
+    symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
+    binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+
+    # Convertendo os símbolos binários para inteiros
+     # Converte os símbolos binários para inteiros
+    symbols = bits_to_int(binary_symbols)  # Converte os símbolos binários para inteiros    
+    symbols = symbols.flatten()  # Achata o array para uma dimensão
+    symbols = symbols.astype(int)  # Converte para inteiro
+
+    modulated = psk_modulate(symbols, modulation_order)
+
+    # Tempo total do sinal
+    t = np.arange(0, len(symbols) * samples_per_symbol) / fs
+
+    # Inicializa o sinal transmitido
+    tx_signal = np.zeros(len(t))
+
+    # Geração do sinal banda passante
+    for i, symbol in enumerate(modulated):
+        # Tempo para o símbolo atual
+        t_symbol = t[i*samples_per_symbol : (i+1)*samples_per_symbol]
+
+        # Modula com a portadora (cos para I, sin para Q)
+        carrier = np.real(symbol) * np.cos(2 * np.pi * fc * t_symbol) - np.imag(symbol) * np.sin(2 * np.pi * fc * t_symbol)
+
+        tx_signal[i*samples_per_symbol : (i+1)*samples_per_symbol] = carrier
+
+    return tx_signal
+
+
+def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
+    num_symbols = len(rx_signal) // samples_per_symbol
+    num_symbols = int(num_symbols)
+    samples_per_symbol = int(samples_per_symbol)
+    # Tempo para um símbolo
+    t_symbol = np.arange(samples_per_symbol) / fs
     
-    # Gerar a portadora senoidal    
-    carrier = create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate)
-
-    # codificação bpsk
-    data = bpsk_codification(data)
-
-    # Repetir os bits para corresponder ao número de amostras por bit
-    bit_repeated = np.repeat(data, number_of_samples_per_bit)
-
-    return carrier * bit_repeated
-
-def bpsk_demodulation(received_signal, carrier_power, carrier_freq, bit_rate):
-    """
-    Demodula um sinal BPSK. (demodulação coerente)
-
-    Args:
-        received_signal (array): Sinal recebido.
-        carrier_freq (float): Frequência da portadora (Hz).
-        sampling_rate (float): Taxa de amostragem (Hz).
-        duration (float): Duração de cada bit (segundos).
-
-    Returns:
-        np.array: Dados binários demodulados.
-    """
-    bit_period = 1 / bit_rate # duração de cada bit
-
-    sampling_rate = NYQUIST_RATE * carrier_freq
-    number_of_samples_per_bit = int(sampling_rate * bit_period)
-    total_samples = len(received_signal) # Número total de amostras
+    # Portadoras vetorizadas
+    cos_wave = np.cos(2 * np.pi * fc * t_symbol)
+    sin_wave = -np.sin(2 * np.pi * fc * t_symbol)
     
-    # Comprimento dos dados
-    #data_length = len(received_signal)/(sampling_rate*bit_period)
-    #data_length = int(data_length) # Arredondar para o inteiro mais próximo
-
-    # Gerar a portadora senoidal local
-    carrier = create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate)
-
-    # Multiplicar o sinal recebido pela portadora (correlação)
-    correlated_signal = received_signal * carrier
-
-    # Número de amostras por bit
-    samples_per_bit = int(sampling_rate * bit_period)
-
-    # Integrar o sinal para cada bit
-    demodulated_bits = []
-    for i in range(0, len(correlated_signal), samples_per_bit):
-        # Somar os valores dentro do intervalo de um bit
-        bit_energy = np.sum(correlated_signal[i:i + samples_per_bit])
-        # Decidir o bit com base no sinal integrado
-        demodulated_bits.append(1 if bit_energy > 0 else 0)
-
-    return np.array(demodulated_bits)
-
-#  Função para codificação BPSK
-def bpsk_codification(data):
-    data = data.astype(int) # Possibilita números negativos
-    return 2 * data - 1  # Converte 0 e 1 para -1 e 1
-
-#  Função para decodificação BPSK
-def bpsk_decodification(received_signal):
-    return (received_signal > 0).astype(int)
+    # Reshape para processar todos os símbolos de uma vez
+    rx_matrix = rx_signal[:num_symbols * samples_per_symbol].reshape((num_symbols, samples_per_symbol))
+    
+    # Integra (soma) I e Q para todos símbolos em bloco
+    I = 2 * np.dot(rx_matrix, cos_wave)
+    Q = 2 * np.dot(rx_matrix, sin_wave)
+    
+    # Calcula ângulo e decide símbolo mais próximo
+    phases = np.arctan2(Q, I)
+    phases[phases < 0] += 2 * np.pi  # Mantém entre 0 e 2pi
+    
+    symbols = np.round(phases * M / (2 * np.pi)) % M
+    symbols = symbols.astype(int)
+    # Converte de volta para bits
+    bits_per_symbol = int(np.log2(M))
+    bits = np.unpackbits(symbols.astype(np.uint8).reshape(-1, 1), axis=1)
+    # Pega os últimos bits_per_symbol bits
+    bits = bits[:, -bits_per_symbol:]  # dim(bits) = (num_simbols, ) each simbol has bits_per_symbol bits  
+    return bits.flatten()
