@@ -3,6 +3,13 @@ import numpy as np
 def dbm_to_linear(dbm_power):
     return 1e-3*10 ** (dbm_power / 10)
 
+def bits_to_int(arr):
+    # Calcula pesos: 2^(posições invertidas)
+    weights = 2 ** np.arange(arr.shape[1]-1, -1, -1)
+    # Faz o produto e soma
+    return arr @ weights
+
+
 def create_carrier_signal(total_samples, carrier_power, carrier_freq, sampling_rate):
     """
     Gera um sinal senoidal com uma dada potência e frequência.

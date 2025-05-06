@@ -2,7 +2,7 @@
 import numpy as np
 
 from compression import compress_image, reconstruct_image
-from modulation import bpsk_modulation, bpsk_demodulation, psk_modulation, psk_demodulation
+from modulation import psk_modulation, psk_demodulation
 from utils import dbm_to_linear
 
 def add_noise(signal, noise_power):
