@@ -1,5 +1,5 @@
 import numpy as np
-from utils import bits_to_int
+from utils import bits_to_int, dbm_to_linear
 
 #  Função para codificação PSK
 def psk_modulate(symbols, modulation_order):
@@ -20,7 +20,6 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
     Returns:
         np.array: Sinal modulado PSK
     """
-   
 
     # data should be organized in groups of log2(modulation_order)
     symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
@@ -56,7 +55,7 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
         # Modula com a portadora (cos para I, sin para Q)
         carrier = np.real(symbol) * np.cos(2 * np.pi * fc * t_symbol) - np.imag(symbol) * np.sin(2 * np.pi * fc * t_symbol)
 
-        tx_signal[i*samples_per_symbol : (i+1)*samples_per_symbol] = carrier
+        tx_signal[i*samples_per_symbol : (i+1)*samples_per_symbol] = np.sqrt(carrier_power)*carrier
 
     return tx_signal, modulated, np.repeat(symbols, samples_per_symbol)  # Retorna o sinal transmitido e o sinal modulado em banda base
 
@@ -69,8 +68,8 @@ def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
     t_symbol = np.arange(samples_per_symbol) / fs
     
     # Portadoras vetorizadas
-    cos_wave = np.cos(2 * np.pi * fc * t_symbol)
-    sin_wave = -np.sin(2 * np.pi * fc * t_symbol)
+    cos_wave = np.cos(2 * np.pi * fc * t_symbol) * np.sqrt(carrier_power)
+    sin_wave = -np.sin(2 * np.pi * fc * t_symbol) * np.sqrt(carrier_power)
     
     # Reshape para processar todos os símbolos de uma vez
     rx_matrix = rx_signal[:num_symbols * samples_per_symbol].reshape((num_symbols, samples_per_symbol))

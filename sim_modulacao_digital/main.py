@@ -7,8 +7,7 @@ from utils import dbm_to_linear
 
 def add_noise(signal, noise_power):
     np.random.seed(42)
-    noise_power_linear = dbm_to_linear(noise_power) # convert from dBm to linear scale
-    noise = np.random.normal(0, noise_power_linear, signal.shape)
+    noise = np.random.normal(0, noise_power, signal.shape)
     return signal + noise
 
 
@@ -16,8 +15,8 @@ class ImageTransmission:
     def __init__(self, num_clusters, modulation_method, carrier_power, noise_power, symbol_rate):
         self.img = None
         self.num_clusters = num_clusters
-        self.snr_db = noise_power
-        self.carrier_power = carrier_power
+        self.snr_db = dbm_to_linear(noise_power)
+        self.carrier_power = dbm_to_linear(carrier_power)
         self.symbol_rate = symbol_rate
         self.fc = 1e4  # Frequência da portadora (Hz)
         self.fs = 1e5  # Frequência de amostragem (Hz)
