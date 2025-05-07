@@ -29,19 +29,14 @@ if uploaded_file:
 
     st.subheader("Configurações da Transmissão")
     # Configurações do usuário
-    modulation_method = st.selectbox("Escolha o método de modulação", ["ASK", "BPSK", "QPSK", "8PSK"], index=0)
+    modulation_method = st.selectbox("Escolha o método de modulação", ["ASK","4ASK", "8ASK",
+                                                                        "BPSK", "QPSK",
+                                                                          "8PSK"], index=0)
     carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=10, value=0)
     noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=10, value=10)
     list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 1000,
                                     1250, 2000, 2500, 5000]
     symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options)
-
-    modulation_method_dic = {
-        'ASK': 2,
-        'BPSK': 2,
-        'QPSK': 4,
-        '8PSK': 8
-    }
 
     # Executar o algoritmo principal
     image_transmission = ImageTransmission(num_clusters, modulation_method, carrier_power, noise_power, symbol_rate)
@@ -70,18 +65,19 @@ if uploaded_file:
     
     symbol_time = 1 / symbol_rate  # Tempo de símbolo
     samples_per_symbol = int(image_transmission.samples_per_symbol)  # Número de amostras por símbolo
-    time_window = st.number_input("Tempo de Execução (s)", min_value=float(2*symbol_time),
+    time_window = st.number_input("Tempo de Execução (s)", min_value=float(symbol_time/2),
                                    max_value=execution_time, value=float(2*symbol_time), step=float(symbol_time))
     
     fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
-    t = np.linspace(0, execution_time, len(modulated_signal))
+    t = np.linspace(0, 2*execution_time, len(modulated_signal)) #não sei porque preciso multiplicar por 2
     num_points = int(len(t) * time_window / execution_time)
 
+    modulation_method_dict = image_transmission.modulation_method_dict
     ax[0].plot(t[:num_points], transmited_symbols[:num_points], drawstyle='steps-post')
-    ax[0].vlines(t[:num_points][::samples_per_symbol], 0, modulation_method_dic[modulation_method], color='r', alpha=0.5, label="Símbolos Transmitidos")
+    ax[0].vlines(t[:num_points][::samples_per_symbol], 0, modulation_method_dict[modulation_method], color='r', alpha=0.5, label="Símbolos Transmitidos")
     ax[0].set_title(f"Dados Binários Transmitidos")
-    ax[0].set_yticks(np.arange(0, modulation_method_dic[modulation_method], 1))
+    ax[0].set_yticks(np.arange(0, modulation_method_dict[modulation_method], 1))
     ax[0].grid()
     ax[0].legend()
     
