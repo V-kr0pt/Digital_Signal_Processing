@@ -2,7 +2,7 @@
 import numpy as np
 
 from compression import compress_image, reconstruct_image
-from modulation import psk_modulation, psk_demodulation
+from modulation import Modulation
 from utils import dbm_to_linear
 
 def add_noise(signal, noise_power):
@@ -13,38 +13,32 @@ def add_noise(signal, noise_power):
 
 class ImageTransmission:
     def __init__(self, num_clusters, modulation_method, carrier_power, noise_power, symbol_rate):
+        # Compressão da imagem
         self.img = None
         self.num_clusters = num_clusters
+        # check se o num_clursters é uma potência de dois
+        if not np.log2(num_clusters).is_integer():
+            raise ValueError("O número de clusters deve ser uma potência de 2")
+
+        # Potência da portadora e do ruído
         self.snr_db = dbm_to_linear(noise_power)
         self.carrier_power = dbm_to_linear(carrier_power)
+
+        # Parâmetros de modulação
+        self.modulation = Modulation(modulation_method, symbol_rate, self.carrier_power, fc=1e4, fs=1e5)
+        self.fc = self.modulation.fc
+        self.fs = self.modulation.fs
         self.symbol_rate = symbol_rate
-        self.fc = 1e4  # Frequência da portadora (Hz)
-        self.fs = 1e5  # Frequência de amostragem (Hz)
-        #self.samples_per_symbol = 100
-        self.M = 4 # ordem de modulação PSK
+        self.M = self.modulation.modulation_order
+    
+        # incializando 
         self.reconstructed_img = None
         self.received_signal = None
         self.modulated_signal = None
         self.demodulated_data = None
         self.execution_time = None
-
-        if modulation_method != 'ASK':
-            if modulation_method == 'BPSK':
-                self.M = 2
-            elif modulation_method == 'QPSK':
-                self.M = 4
-            elif modulation_method == '8PSK':
-                self.M = 8
-            else:
-                raise ValueError("Método de modulação inválido. Escolha entre 'ASK', 'BPSK', 'QPSK' ou '8PSK'.")
-        else:
-            ...
-
-
-        # check se o num_clursters é uma potência de dois
-        if not np.log2(num_clusters).is_integer():
-            raise ValueError("O número de clusters deve ser uma potência de 2")
-
+        
+        
     def run(self, img):
         self.img = img
         # Compressão
@@ -64,7 +58,7 @@ class ImageTransmission:
         # Modulação
         self.samples_per_symbol = int(self.fs / self.symbol_rate)
         self.modulated_signal, self.modulated_base_band, self.transmited_symbols, self.I_send, self.Q_send =\
-              psk_modulation(self.compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
+              self.modulation.modulate(self.compressed_data_bin)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
@@ -75,7 +69,7 @@ class ImageTransmission:
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Demodulação
-        demodulated_data_bin, self.I_recv, self.Q_recv = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
+        demodulated_data_bin, self.I_recv, self.Q_recv = self.modulation.demodulate(self.received_signal)
         # garanto que o tamanho é o sem padding adicionado durante a transmissão e recrio os vetores do dicionário
         demodulated_data_bin = demodulated_data_bin[:total_data_num_bits].reshape(-1, num_bits_per_vector).astype(np.uint8) 
 
