@@ -32,8 +32,8 @@ if uploaded_file:
     modulation_method = st.selectbox("Escolha o método de modulação", ["ASK","4ASK", "8ASK",
                                                                         "BPSK", "QPSK",
                                                                           "8PSK"], index=0)
-    carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=10, value=0)
-    noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=10, value=10)
+    carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=100, value=0)
+    noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=100, value=10)
     list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 1000,
                                     1250, 2000, 2500, 5000]
     symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options)
