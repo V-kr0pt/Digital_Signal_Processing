@@ -63,9 +63,8 @@ class ImageTransmission:
         
         # Modulação
         self.samples_per_symbol = int(self.fs / self.symbol_rate)
-        self.modulated_signal, self.modulated_base_band, self.transmited_symbols = psk_modulation(self.compressed_data_bin,
-                                                                                              self.M, self.samples_per_symbol,
-                                                                                                self.carrier_power, self.fc, self.fs)
+        self.modulated_signal, self.modulated_base_band, self.transmited_symbols, self.I_send, self.Q_send =\
+              psk_modulation(self.compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
@@ -76,7 +75,7 @@ class ImageTransmission:
         self.execution_time = total_data_num_bits/self.bit_rate  
 
         # Demodulação
-        demodulated_data_bin = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
+        demodulated_data_bin, self.I_recv, self.Q_recv = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
         # garanto que o tamanho é o sem padding adicionado durante a transmissão e recrio os vetores do dicionário
         demodulated_data_bin = demodulated_data_bin[:total_data_num_bits].reshape(-1, num_bits_per_vector).astype(np.uint8) 
 

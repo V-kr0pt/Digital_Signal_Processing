@@ -88,13 +88,30 @@ if uploaded_file:
     ax[1].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post')
     ax[1].set_title(f"Sinal Modulado {modulation_method}")
     ax[1].grid()
-    ax[1].legend()
 
     ax[2].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post')
     ax[2].set_title("Sinal Recebido")
     ax[2].grid()
-    ax[2].legend()
 
     fig.tight_layout()
 
+    st.pyplot(fig)
+
+    st.markdown("### Constelação de Símbolos")
+    fig, ax = plt.subplots(figsize=(6, 6))
+    I_send, Q_send = np.round(image_transmission.I_send,10), np.round(image_transmission.Q_send, 10)
+    ax.scatter(I_send, Q_send, color='blue', alpha=0.5)
+    ax.set_xlabel("I")
+    ax.set_ylabel("Q")
+    ax.set_title("Constelação de Símbolos Enviada")
+    ax.grid()
+    st.pyplot(fig)
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    I_recv, Q_recv = np.round(image_transmission.I_recv,10), np.round(image_transmission.Q_recv,10)
+    ax.scatter(I_recv, Q_recv, color='red', alpha=0.5)
+    ax.set_xlabel("I")
+    ax.set_ylabel("Q")
+    ax.set_title("Constelação de Símbolos Recebida")
+    ax.grid()
     st.pyplot(fig)

@@ -41,6 +41,10 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
 
     modulated = psk_modulate(symbols, modulation_order)
 
+    # Valores I e Q por símbolo (antes de gerar o sinal)
+    I = np.real(modulated) * np.sqrt(carrier_power)
+    Q = np.imag(modulated) * np.sqrt(carrier_power)
+
     # Tempo total do sinal
     t = np.arange(0, len(symbols) * samples_per_symbol) / fs
 
@@ -57,7 +61,7 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
 
         tx_signal[i*samples_per_symbol : (i+1)*samples_per_symbol] = np.sqrt(carrier_power)*carrier
 
-    return tx_signal, modulated, np.repeat(symbols, samples_per_symbol)  # Retorna o sinal transmitido e o sinal modulado em banda base
+    return tx_signal, modulated, np.repeat(symbols, samples_per_symbol), I, Q  # Retorna o sinal transmitido e o sinal modulado em banda base
 
 
 def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
@@ -68,15 +72,15 @@ def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
     t_symbol = np.arange(samples_per_symbol) / fs
     
     # Portadoras vetorizadas
-    cos_wave = np.cos(2 * np.pi * fc * t_symbol) * np.sqrt(carrier_power)
-    sin_wave = -np.sin(2 * np.pi * fc * t_symbol) * np.sqrt(carrier_power)
+    cos_wave = np.cos(2 * np.pi * fc * t_symbol) 
+    sin_wave = -np.sin(2 * np.pi * fc * t_symbol) 
     
     # Reshape para processar todos os símbolos de uma vez
     rx_matrix = rx_signal[:num_symbols * samples_per_symbol].reshape((num_symbols, samples_per_symbol))
     
     # Integra (soma) I e Q para todos símbolos em bloco
-    I = 2 * np.dot(rx_matrix, cos_wave)
-    Q = 2 * np.dot(rx_matrix, sin_wave)
+    I = 2/samples_per_symbol * np.dot(rx_matrix, cos_wave) 
+    Q = 2/samples_per_symbol * np.dot(rx_matrix, sin_wave)
     
     # Calcula ângulo e decide símbolo mais próximo
     phases = np.arctan2(Q, I)
@@ -89,4 +93,4 @@ def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
     bits = np.unpackbits(symbols.astype(np.uint8).reshape(-1, 1), axis=1)
     # Pega os últimos bits_per_symbol bits
     bits = bits[:, -bits_per_symbol:]  # dim(bits) = (num_simbols, ) each simbol has bits_per_symbol bits  
-    return bits.flatten()
+    return bits.flatten(), I, Q
