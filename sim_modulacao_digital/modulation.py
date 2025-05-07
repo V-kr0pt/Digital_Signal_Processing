@@ -11,16 +11,18 @@ class Modulation:
         self.define_modulation_order()
 
     def define_modulation_order(self):
-        if self.set_modulation == 'ASK':
-            self.modulation_order = 2
-        elif self.set_modulation == 'BPSK':
-            self.modulation_order = 2
-        elif self.set_modulation == 'QPSK':
-            self.modulation_order = 4
-        elif self.set_modulation == '8PSK':
-            self.modulation_order = 8
-        else:
-            raise ValueError("Método de modulação inválido. Escolha entre 'ASK', 'BPSK', 'QPSK' ou '8PSK'.")
+        self.modulation_method_dict = {
+            'ASK': 2,
+            '4ASK': 4,
+            '8ASK': 8,
+            'BPSK': 2,
+            'QPSK': 4,
+            '8PSK': 8,
+        }
+        try:
+            self.modulation_order = self.modulation_method_dict[self.set_modulation]
+        except KeyError:
+            raise ValueError("Método de modulação inválido. Escolha entre 'ASK', '4ASK', '8ASK', 'BPSK', 'QPSK' ou '8PSK'.")
 
     def modulate(self, data):
         if self.set_modulation[-3:] == 'ASK':
