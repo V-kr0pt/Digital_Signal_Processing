@@ -69,9 +69,9 @@ class ImageTransmission:
 
         # Modulação
         self.samples_per_symbol = int(self.fs / self.symbol_rate)
-        print(f"{self.fs / self.symbol_rate}")
-        print(f"Samples per symbol: {self.samples_per_symbol}")
-        self.modulated_signal = psk_modulation(self.compressed_data_bin, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
+        self.modulated_signal, self.modulated_base_band, self.transmited_symbols = psk_modulation(self.compressed_data_bin,
+                                                                                              self.M, self.samples_per_symbol,
+                                                                                                self.carrier_power, self.fc, self.fs)
 
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
@@ -98,7 +98,7 @@ class ImageTransmission:
         self.reconstructed_img = np.clip(self.reconstructed_img, 0, 255) / 255.0
         self.img = self.img / 255.0  # Normalizar imagem original também
 
-        return self.reconstructed_img, self.received_signal, self.modulated_signal, self.demodulated_data, self.compressed_data_bin, self.execution_time
+        return self.reconstructed_img, self.received_signal, self.modulated_signal, self.demodulated_data, self.transmited_symbols, self.execution_time
 
 
 
@@ -111,8 +111,8 @@ if __name__ == '__main__':
 
     bit_rate = 100
     modulation_method='8PSK'
-    image_transmission = ImageTransmission(num_clusters=16, modulation_method=modulation_method, carrier_power=1, noise_power=-4, bit_rate=bit_rate)
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, compressed_data_bin, execution_time = image_transmission.run(img)
+    image_transmission = ImageTransmission(num_clusters=16, modulation_method=modulation_method, carrier_power=1, noise_power=-4, symbol_rate=bit_rate)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, transmited_symbols, execution_time = image_transmission.run(img)
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     t = np.linspace(0, execution_time, len(modulated_signal))
     num_points = int(len(t) * time_window / execution_time)
 
-    ax[0].plot(t[:num_points], compressed_data_bin[:num_points], drawstyle='steps-post', label="Dados Binários Transmitidos")
+    ax[0].plot(t[:num_points], transmited_symbols[:num_points], drawstyle='steps-post', label="Dados Binários Transmitidos")
     ax[0].grid()
     ax[0].legend()
     

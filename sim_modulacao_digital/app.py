@@ -32,13 +32,13 @@ if uploaded_file:
     modulation_method = st.selectbox("Escolha o método de modulação", ["ASK", "BPSK", "QPSK", "8PSK"], index=0)
     carrier_power = st.slider("Potência da Portadora (dBm)", min_value=-50, max_value=10, value=0)
     noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=10, value=10)
-    list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 800, 1000,
-                                    1250, 2000, 2500, 3125, 4000, 5000, 6250, 10000, 12500]
+    list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 1000,
+                                    1250, 2000, 2500, 5000]
     symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options)
 
     # Executar o algoritmo principal
     image_transmission = ImageTransmission(num_clusters, modulation_method, carrier_power, noise_power, symbol_rate)
-    reconstructed_img, received_signal, modulated_signal, demodulated_data, compressed_data_bin, execution_time= image_transmission.run(img)
+    reconstructed_img, received_signal, modulated_signal, demodulated_data, transmited_symbols, execution_time= image_transmission.run(img)
 
     # Mostrar imagens lado a lado
     st.image([img, reconstructed_img], caption=["Imagem Original", "Imagem Reconstruída"], width=300)
@@ -70,16 +70,29 @@ if uploaded_file:
     t = np.linspace(0, execution_time, len(modulated_signal))
     num_points = int(len(t) * time_window / execution_time)
 
-    ax[0].plot(t[:num_points], compressed_data_bin[:num_points], drawstyle='steps-post', label="Dados Binários Transmitidos")
+    modulation_method_dic = {
+        'ASK': 2,
+        'BPSK': 2,
+        'QPSK': 4,
+        '8PSK': 8
+    }
+
+    ax[0].plot(t[:num_points], transmited_symbols[:num_points], drawstyle='steps-post')
+    ax[0].set_title(f"Dados Binários Transmitidos")
+    ax[0].set_yticks(np.arange(0, modulation_method_dic[modulation_method], 1))
     ax[0].grid()
     ax[0].legend()
     
-    ax[1].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post', label=f"Sinal Modulado {modulation_method}")
+    ax[1].plot(t[:num_points], modulated_signal[:num_points], drawstyle='steps-post')
+    ax[1].set_title(f"Sinal Modulado {modulation_method}")
     ax[1].grid()
     ax[1].legend()
 
-    ax[2].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post', label="Sinal Recebido com Ruído", color='r')
+    ax[2].plot(t[:num_points], received_signal[:num_points], drawstyle='steps-post')
+    ax[2].set_title("Sinal Recebido")
     ax[2].grid()
     ax[2].legend()
+
+    fig.tight_layout()
 
     st.pyplot(fig)

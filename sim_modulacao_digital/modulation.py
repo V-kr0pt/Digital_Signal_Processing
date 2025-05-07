@@ -58,7 +58,7 @@ def psk_modulation(data, modulation_order, samples_per_symbol, carrier_power=1, 
 
         tx_signal[i*samples_per_symbol : (i+1)*samples_per_symbol] = carrier
 
-    return tx_signal
+    return tx_signal, modulated, np.repeat(symbols, samples_per_symbol)  # Retorna o sinal transmitido e o sinal modulado em banda base
 
 
 def psk_demodulation(rx_signal, M,  samples_per_symbol, carrier_power, fc, fs):
