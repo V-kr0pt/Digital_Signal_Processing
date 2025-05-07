@@ -30,7 +30,7 @@ class ImageTransmission:
         self.fs = self.modulation.fs
         self.symbol_rate = symbol_rate
         self.M = self.modulation.modulation_order
-    
+        self.modulation_method_dict = self.modulation.modulation_method_dict
         # incializando 
         self.reconstructed_img = None
         self.received_signal = None
