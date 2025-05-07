@@ -20,7 +20,7 @@ if uploaded_file:
     
     # Lista de potências de 2 dentro do intervalo desejado
     potencias_de_2 = [2**i for i in range(1, 9)]  # De 2^1 (2) até 2^8 (256)
-    algo_options = ['DCT', 'Vetorização']
+    algo_options = ['DCT']
 
     # Menu suspenso para selecionar o número de clusters
     algorithm = st.selectbox("Algoritmo de Compressão", algo_options, index=0) 
