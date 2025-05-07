@@ -20,7 +20,7 @@ class Modulation:
         elif self.set_modulation == '8PSK':
             self.modulation_order = 8
         else:
-            raise ValueError("Método de modulação inválido. Escolha entre 'ASK', 'BPSK', 'QPSK', '8PSK', '16QAM' ou '64QAM'.")
+            raise ValueError("Método de modulação inválido. Escolha entre 'ASK', 'BPSK', 'QPSK' ou '8PSK'.")
 
     def modulate(self, data):
         if self.set_modulation[-3:] == 'ASK':
@@ -37,6 +37,21 @@ class Modulation:
             return self.psk_demodulation(rx_signal, self.modulation_order, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
         else:
             raise NotImplementedError("Método de demodulação não implementado.")
+        
+    def create_binary_symbols(self, data, modulation_order):
+        # data should be organized in groups of log2(modulation_order)
+        symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
+        try:
+            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+        except:
+            # Se não for possível fazer o reshape, adiciona zeros à direita
+            # Adiciona zeros à direita para completar o último símbolo
+            padding_length = symbol_length - (len(data) % symbol_length)
+            if padding_length < symbol_length:
+                data = np.concatenate((data, np.zeros(padding_length, dtype=data.dtype)))
+            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+        
+        return binary_symbols
 
     def ask_modulation(self, data, modulation_order, samples_per_symbol, carrier_power=1, fc=1e3, fs=1e4):
         """
@@ -53,20 +68,12 @@ class Modulation:
         Returns:
             np.array: Sinal modulado ASK
         """
-        # data should be organized in groups of log2(modulation_order)
-        symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
-        try:
-            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
-        except:
-            # Se não for possível fazer o reshape, adiciona zeros à direita
-            # Adiciona zeros à direita para completar o último símbolo
-            padding_length = symbol_length - (len(data) % symbol_length)
-            if padding_length < symbol_length:
-                data = np.concatenate((data, np.zeros(padding_length, dtype=data.dtype)))
-            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+
+
+        # Criando os símbolos binários
+        binary_symbols = self.create_binary_symbols(data, modulation_order)
 
         # Convertendo os símbolos binários para inteiros
-         # Converte os símbolos binários para inteiros
         symbols = bits_to_int(binary_symbols)  # Converte os símbolos binários para inteiros    
         symbols = symbols.flatten()  # Achata o array para uma dimensão
         symbols = symbols.astype(int)  # Converte para inteiro
@@ -75,7 +82,7 @@ class Modulation:
         Q = np.zeros_like(I)  # Valores Q por símbolo (zero para ASK)
 
         # Tempo total do sinal
-        t = np.arange(0, len(data) * samples_per_symbol) / fs
+        t = np.arange(0, len(symbols) * samples_per_symbol) / fs
 
         # Inicializa o sinal transmitido
         tx_signal = np.zeros(len(t))
@@ -100,7 +107,7 @@ class Modulation:
         t_symbol = np.arange(samples_per_symbol) / fs
 
         # Portadoras vetorizadas
-        cos_wave = np.cos(2 * np.pi * fc * t_symbol) * np.sqrt(carrier_power)
+        cos_wave = np.cos(2 * np.pi * fc * t_symbol)
 
         # Reshape para processar todos os símbolos de uma vez
         rx_matrix = rx_signal[:num_symbols * samples_per_symbol].reshape((num_symbols, samples_per_symbol))
@@ -110,7 +117,16 @@ class Modulation:
         Q = np.zeros_like(I)
 
         # Calcula ângulo e decide símbolo mais próximo
-        symbols = np.round(I).astype(int)
+        amplitudes = I/np.sqrt(carrier_power)
+        #symbols = np.round(amplitudes).astype(int)
+        #symbols = np.clip(symbols, 0, modulation_order - 1)
+
+        # Definindo os símbolos válidos (0, 1, 2, ..., M-1)
+        possible_symbols = np.arange(modulation_order)
+
+        # Decisão usando distância mínima
+        symbols = np.array([possible_symbols[np.argmin(np.abs(i - possible_symbols))] for i in amplitudes])
+
 
         # Converte de volta para bits
         bits_per_symbol = int(np.log2(modulation_order))
@@ -118,7 +134,6 @@ class Modulation:
         # Pega os últimos bits_per_symbol bits
         bits = bits[:, -bits_per_symbol:]  # dim(bits) = (num_simbols, ) each simbol has bits_per_symbol bits  
         return bits.flatten(), I, Q
-
 
 
     #  Função para codificação PSK
@@ -141,20 +156,9 @@ class Modulation:
             np.array: Sinal modulado PSK
         """
 
-        # data should be organized in groups of log2(modulation_order)
-        symbol_length = int(np.log2(modulation_order)) # Número de bits por símbolo
-        try:
-            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
-        except:
-            # Se não for possível fazer o reshape, adiciona zeros à direita
-            # Adiciona zeros à direita para completar o último símbolo
-            padding_length = symbol_length - (len(data) % symbol_length)
-            if padding_length < symbol_length:
-                data = np.concatenate((data, np.zeros(padding_length, dtype=data.dtype)))
-            binary_symbols = np.reshape(data, (-1, symbol_length)) # Reshape the data to groups of log2(modulation_order)
+        binary_symbols = self.create_binary_symbols(data, modulation_order)  # Cria os símbolos binários
 
         # Convertendo os símbolos binários para inteiros
-         # Converte os símbolos binários para inteiros
         symbols = bits_to_int(binary_symbols)  # Converte os símbolos binários para inteiros    
         symbols = symbols.flatten()  # Achata o array para uma dimensão
         symbols = symbols.astype(int)  # Converte para inteiro
