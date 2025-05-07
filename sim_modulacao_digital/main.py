@@ -55,18 +55,13 @@ class ImageTransmission:
         compressed_data = labels.reshape(-1)  # Flatten the quantized DCT coefficients
 
         # Transformando os índices em binário
-        num_bits_per_symbol = int(np.ceil(np.log2(self.num_clusters)))  # Número de bits necessários para criar um símbolo com os num_clusters possíveis
+        num_bits_per_vector = int(np.ceil(np.log2(self.num_clusters)))  # Número de bits necessários para criar um vetor com os num_clusters possíveis
         compressed_data_bin = np.unpackbits(compressed_data.astype(np.uint8).reshape(-1, 1), axis=1)
 
         # The unpack return 8 bits, and we're using the MSB (Most Significant Bits) first so we need to take the last num_bits
-        compressed_data_bin = compressed_data_bin[:, -num_bits_per_symbol:]  # dim(compressed_data_bin) = (num_simbols, ) each simbol has num_bits_per_symbol bits
+        compressed_data_bin = compressed_data_bin[:, -num_bits_per_vector:]  # dim(compressed_data_bin) = (num_simbols, ) each vector has num_bits_per_symbol bits
         self.compressed_data_bin = compressed_data_bin.flatten()
         
-        # Tempo necessário para enviar todos os bits
-        self.bit_rate = self.symbol_rate * num_bits_per_symbol  # bits/s
-        total_data_num_bits = self.compressed_data_bin.size 
-        self.execution_time = total_data_num_bits/self.bit_rate  
-
         # Modulação
         self.samples_per_symbol = int(self.fs / self.symbol_rate)
         self.modulated_signal, self.modulated_base_band, self.transmited_symbols = psk_modulation(self.compressed_data_bin,
@@ -76,14 +71,19 @@ class ImageTransmission:
         # Transmissão com Ruído
         self.received_signal = add_noise(self.modulated_signal, self.snr_db)
 
+        # Calcular o tempo de execução
+        self.bit_rate = self.symbol_rate * self.M   # bits/s
+        total_data_num_bits = self.compressed_data_bin.size 
+        self.execution_time = total_data_num_bits/self.bit_rate  
+
         # Demodulação
         demodulated_data_bin = psk_demodulation(self.received_signal, self.M, self.samples_per_symbol, self.carrier_power, self.fc, self.fs)
         # garanto que o tamanho é o sem padding adicionado durante a transmissão e recrio os vetores do dicionário
-        demodulated_data_bin = demodulated_data_bin[:total_data_num_bits].reshape(-1, num_bits_per_symbol).astype(np.uint8) 
+        demodulated_data_bin = demodulated_data_bin[:total_data_num_bits].reshape(-1, num_bits_per_vector).astype(np.uint8) 
 
         # Reconverter binário para índices de clusters
         # Adicionar zeros à esquerda para completar 8 bits
-        demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits_per_symbol),dtype=np.uint8),
+        demodulated_data_bin = np.hstack([np.zeros((demodulated_data_bin.shape[0], 8 - num_bits_per_vector),dtype=np.uint8),
                                           demodulated_data_bin], dtype=np.uint8)
 
         # Converter de binário para decimal
