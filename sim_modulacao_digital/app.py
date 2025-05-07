@@ -36,7 +36,7 @@ if uploaded_file:
     noise_power = st.slider("Potência do Ruído (dBm)", min_value=-50, max_value=100, value=10)
     list_of_symbol_rate_options = [100, 125, 160, 200, 250, 400, 500, 625, 1000,
                                     1250, 2000, 2500, 5000]
-    symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options, index=11)
+    symbol_rate = st.selectbox("Baud Rate (symbols/s)", list_of_symbol_rate_options, index=11)
 
     # Executar o algoritmo principal
     image_transmission = ImageTransmission(num_clusters, modulation_method, carrier_power, noise_power, symbol_rate)
