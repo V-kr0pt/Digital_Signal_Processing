@@ -36,6 +36,13 @@ if uploaded_file:
                                     1250, 2000, 2500, 5000]
     symbol_rate = st.selectbox("Bound Rate (symbols/s)", list_of_symbol_rate_options)
 
+    modulation_method_dic = {
+        'ASK': 2,
+        'BPSK': 2,
+        'QPSK': 4,
+        '8PSK': 8
+    }
+
     # Executar o algoritmo principal
     image_transmission = ImageTransmission(num_clusters, modulation_method, carrier_power, noise_power, symbol_rate)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, transmited_symbols, execution_time= image_transmission.run(img)
@@ -50,7 +57,7 @@ if uploaded_file:
     seconds_execution_time = execution_time % 60
     
     # Apresenta o tempo de execução para o usuário
-    st.write("O total de bits transmitido foi de ", len(modulated_signal), " bits")
+    st.write("O total de bits transmitido foi de ", len(image_transmission.compressed_data_bin), " bits")
     time_string = "O tempo necessário para enviar todos os bits foi de "
     if hours_execution_time > 0:
         time_string += f"{hours_execution_time:.0f} horas, "
@@ -62,6 +69,7 @@ if uploaded_file:
     
     
     symbol_time = 1 / symbol_rate  # Tempo de símbolo
+    samples_per_symbol = int(image_transmission.samples_per_symbol)  # Número de amostras por símbolo
     time_window = st.number_input("Tempo de Execução (s)", min_value=float(2*symbol_time),
                                    max_value=execution_time, value=float(2*symbol_time), step=float(symbol_time))
     
@@ -70,14 +78,8 @@ if uploaded_file:
     t = np.linspace(0, execution_time, len(modulated_signal))
     num_points = int(len(t) * time_window / execution_time)
 
-    modulation_method_dic = {
-        'ASK': 2,
-        'BPSK': 2,
-        'QPSK': 4,
-        '8PSK': 8
-    }
-
     ax[0].plot(t[:num_points], transmited_symbols[:num_points], drawstyle='steps-post')
+    ax[0].vlines(t[:num_points][::samples_per_symbol], 0, modulation_method_dic[modulation_method], color='r', alpha=0.5, label="Símbolos Transmitidos")
     ax[0].set_title(f"Dados Binários Transmitidos")
     ax[0].set_yticks(np.arange(0, modulation_method_dic[modulation_method], 1))
     ax[0].grid()

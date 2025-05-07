@@ -109,14 +109,14 @@ if __name__ == '__main__':
     img = cv2.imread('Lab.HAF_4968.jpg', cv2.IMREAD_GRAYSCALE) 
     img = cv2.resize(img, (128, 128))
 
-    bit_rate = 100
+    symbol_rate = 200
     modulation_method='8PSK'
-    image_transmission = ImageTransmission(num_clusters=16, modulation_method=modulation_method, carrier_power=1, noise_power=-4, symbol_rate=bit_rate)
+    image_transmission = ImageTransmission(num_clusters=16, modulation_method=modulation_method, carrier_power=1, noise_power=-4, symbol_rate=symbol_rate)
     reconstructed_img, received_signal, modulated_signal, demodulated_data, transmited_symbols, execution_time = image_transmission.run(img)
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
-    time_window = 2* bit_rate
+    time_window = 2* symbol_rate
     t = np.linspace(0, execution_time, len(modulated_signal))
     num_points = int(len(t) * time_window / execution_time)
 
